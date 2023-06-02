@@ -1,0 +1,17 @@
+select t1.*, sp1.[open], sp2.[Close] from
+(
+	select min(p.[Date]) as weekstart, max(p.[date]) as weekend, max(p.[High]) as [High], min(p.[Low]) as [Low], sum(p.Volume) as Volume
+	from
+	(
+		select  p.*, strftime('%Y',p.[date]) as yearnum,  strftime('%W', p.[date]) as weeknum from [Price] p
+		where p.[Ticker] = 'TSLA'
+	) p
+	group by p.yearnum,  p.[weeknum]
+) t1
+inner join
+[Price] sp1 on
+(sp1.[Date] = t1.weekstart and sp1.Ticker = 'TSLA')
+inner join
+[Price] sp2 on
+(sp2.[Date] = t1.[weekend] and sp2.Ticker = 'TSLA')
+where t1.weekend > DATE(DATE('NOW'), '-5 YEAR')

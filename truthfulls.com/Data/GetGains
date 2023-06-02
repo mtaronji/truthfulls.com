@@ -1,0 +1,4 @@
+select t.* from
+(select p.[Date], p.[close] / lag(p.[Close], 1, 0) over(order by p.[date])-1 as previous
+from [price] p where p.Ticker = 'SPY') t
+where t.previous is not null
