@@ -1,0 +1,15 @@
+*.db
+*.dll
+*.json
+*.exe
+*.user
+*.sln
+truthfulls.com/bin
+truthfulls.com/data
+truthfulls.com/obj
+truthfulls.com/migrations
+truthfulls.com/properties
+truthfullsTests/bin
+truthfullsTests/obj
+.vs
+

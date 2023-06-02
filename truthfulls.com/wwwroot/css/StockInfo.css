@@ -1,0 +1,161 @@
+﻿/*For StockInfo View
+*/
+
+#ticker-search-input-container {
+    display: flex;
+    flex-direction: column;
+    width: 17%;
+    outline: 1px solid gold;
+    height: 100%;
+}
+
+#container-input-txt {
+    display: flex;
+    flex-direction: column;
+}
+#page-stock-index {
+    display: flex;
+    flex-direction: row-reverse;
+    height: 100%;
+    width: 100%;
+}
+#tickerinput {
+}
+
+
+.tooltip-text{
+    visibility:hidden;
+    color:black;
+    position:absolute;
+}
+
+.tooltip:hover .tooltip-text{
+    visibility:visible;
+}
+.filter-lbl {
+    font-size:14px;
+    color:gray;
+}
+
+.filter-chk{
+    margin-right:auto;
+}
+
+#top-bar-search:hover {
+    color: silver !important;
+    outline: 1px solid silver;
+}
+
+#tickers-list {
+}
+
+#getprices-search-btn {
+}
+
+#getprices-search-btn:hover {
+    outline: 1px solid green;
+}
+
+#chart-container{
+
+}
+
+svg{
+
+}
+
+#chart-tab{
+    display:flex;
+    flex-direction:row;
+    height:10%;
+    width:10%;
+}
+#chart-tab-btn{
+    background-color:cornflowerblue;
+}
+#btn-chart {
+    background-color: silver;
+}
+.chart-tab-btn:hover{
+    color:white;
+}
+
+
+#stats{
+
+}
+
+.validation-input {
+    font-family: Arial, Helvetica, sans-serif;
+    color: orangered;
+}
+/*phones and smaller screens*/
+@media (max-width:666px) {
+    #page-stock-index {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        width: 100%;
+    }
+
+    #ticker-search-input-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        height: 15%;
+        margin:auto;
+    }
+
+    #ticker-search-txt-input {
+        margin: auto;
+    }
+    #form-ticker-search {
+        display: flex;
+        flex-direction: row;
+        height: 100%;
+        width: 100%;
+        margin: auto;
+    }
+
+    #radio-tf{
+        font-size:15px;
+        font-family:'Times New Roman', Times, serif;
+        margin:auto;
+    }
+    #ticker-duration-slct-lbl {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 15px;
+        margin: auto;
+    }
+    #ticker-search-duration-slct{
+        margin:auto;
+    }
+    #ticker-search-btn {
+        margin-right:auto;
+        margin-bottom:auto;
+        margin-top:auto;
+    }
+    #chart-container {
+        height:75%;
+        width:100%;
+    }
+
+    #chart-area {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    #chart-tab {
+        display: flex;
+        flex-direction: row;
+        height: 15%;
+        width: 10%;
+    }
+    
+}
+
+/*regular screens*/
+
+/*larger screens*/
+

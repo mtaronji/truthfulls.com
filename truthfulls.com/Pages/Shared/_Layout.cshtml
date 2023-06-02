@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>@ViewData["Title"] - truthfulls.com</title>
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/truthfulls.com.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+
+    <div class="flex-container-c height-full width-full">
+
+        <div id="row1" class="flex-container-r width-full"> 
+    
+            <div id="top-bar">
+
+            </div>
+        </div>
+ 
+        <div id="row2" class="flex-container-r height-full width-full">
+
+            <div id="sidebar" class="flex-container-c height-full">
+               @* <a class="sidebar-link" asp-page="/Stocks/StockIndex"> Stocks </a>
+                <a class="sidebar-link" asp-page="/Stocks/StockIndex">Options</a>
+                <a class="sidebar-link" asp-page="/Stocks/StockIndex">Latest Headlines</a>
+                <a class="sidebar-link" asp-page="/Stocks/StockIndex">Ideas</a>
+                <a class="sidebar-link" asp-page="/Canvas">Canvas</a>*@
+            </div>
+
+            <main role="main" class="content">
+                @RenderBody()
+            </main>
+        </div> 
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script type="text/javascript" src="~/lib/Plotly/plotly-2.20.0.min.js"> </script>
+    <script type="text/javascript" src="/js/StockIndex.js"> </script>
+   
+
+
+    @await RenderSectionAsync("Scripts",required: false)
+ 
+
+</body>
+</html>
