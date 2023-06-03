@@ -10,6 +10,8 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Runtime.InteropServices;
 using Microsoft.Data.Sqlite;
+using System.Runtime.Caching;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace truthfulls.com.Services
 {
@@ -31,13 +33,16 @@ namespace truthfulls.com.Services
     public class StockVMService : IStockVMService
     {
         SqlConnectionStringBuilder builder;
-        public StockVMService(IConfiguration c)
+        IMemoryCache _cache;
+
+        public StockVMService(IConfiguration config, IMemoryCache cache)
         {
             /*this uses windows integrated security so no creditials are exposed. 
              * Use App settings Json to store the connection string for best practices*/
             builder = new();
+            this._cache = cache;
             //this.builder.ConnectionString = c.GetConnectionString("DefaultConnection");   //sql server test string
-            this.builder.ConnectionString = c.GetConnectionString("testdbl");
+            this.builder.ConnectionString = config.GetConnectionString("develop");
         }
 
         public StockVMService(string testconnectionstring)
@@ -49,32 +54,47 @@ namespace truthfulls.com.Services
 
         public async Task<List<string>> GetTickersAsync()
         {
-            var tickers = new List<string>();
 
-            string queryString = $"select s.[ticker] from [Stock] s"; 
-                                                                    
-            try
+            List<string>? tickers;
+            tickers = _cache.Get<List<string>>(key: "Tickers");
+
+            //if nothing in cache set it.
+            if (tickers == null)
             {
-                using (var connection = new SqliteConnection(this.builder.ConnectionString))
+                tickers = new List<string>();
+                string queryString = $"select s.[ticker] from [Stock] s";
+
+                try
                 {
-                    connection.Open();
-
-                    var command = connection.CreateCommand();
-                    command.CommandText = queryString;
-
-                    using (var reader = await command.ExecuteReaderAsync())
+                    using (var connection = new SqliteConnection(this.builder.ConnectionString))
                     {
-                        while (reader.Read())
+                        connection.Open();
+
+                        var command = connection.CreateCommand();
+                        command.CommandText = queryString;
+
+                        using (var reader = await command.ExecuteReaderAsync())
                         {
-                            var ticker = reader.GetString(0);
-                            tickers.Add(ticker);
+                            while (reader.Read())
+                            {
+                                var ticker = reader.GetString(0);
+                                tickers.Add(ticker);
+                            }
+                            reader.Close();
+                            if (tickers.Count > 0) { _cache.Set(key: "Tickers", tickers, TimeSpan.FromDays(1)); }
+                                                      
                         }
-                        reader.Close();
                     }
                 }
+                catch (SqliteException ex) 
+                { 
+                    Console.WriteLine(ex.Message); 
+                }
             }
+            
+            if (tickers == null)
+                throw new ArgumentNullException("tickers are null. Fatal Error");         
 
-            catch (SqlException ex) { Console.WriteLine(ex.Message); }
             return tickers;
         }
         public async Task<List<DailyPriceVM>> GetDPricesAsync(string ticker, int duration) 

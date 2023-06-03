@@ -107,12 +107,13 @@ function initializeApp() {
     //set default values for some inputs
     truthfullsApp.StockInfoPage.events.setSelectedTimeFrame(truthfullsApp.StockInfoPage.state.selectedTimeFrame);
     truthfullsApp.StockInfoPage.events.setDuration(truthfullsApp.StockInfoPage.state.selectedDuration);
+    truthfullsApp.StockInfoPage.events.loadChartTab();
 
     for (let i = 0; i < truthfullsApp.StockInfoPage.data.tickers.length; i++) {
         var t = truthfullsApp.StockInfoPage.data.tickers[i];
         document.querySelector("#tickers-datalist").innerHTML += `<option>${t}</option>`
     }
-    //insert into datalist
+    
 }
 function onKeyUpTickerSearchTxt(event) {
     //check that input is good when user is done typing
@@ -361,7 +362,7 @@ function onLoadFundiesTab() {
 function onLoadChartTab() {
     truthfullsApp.StockInfoPage.state.currentChartFocus = truthfullsApp.StockInfoPage.ChartFocus.PriceChart;
 
-    document.querySelector("#btn-chart").style.Color = "silver";
+    document.querySelector("#btn-chart").style.color = "silver";
     document.querySelector("#btn-fundies").style.color = "black";
     document.querySelector("#btn-stats").style.color = "black";
 
