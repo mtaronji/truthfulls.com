@@ -5,29 +5,30 @@
 }
 @using truthfulls.com.ViewModel
 
+
 <div id="page-stock-index">
 
     <div id="ticker-search-input-container">
 
-        <form id="form-ticker-search" asp-page-handler="GetPrices" method="post" class="flex-container-c height-quarter width-full" onsubmit="return truthfullsApp.StockInfoPage.events.validateStockSearchFormSubmit(this)">
+        <form id="form-ticker-search" asp-page-handler="GetPrices" method="post" class="flex-container-c height-quarter width-full" onsubmit="return E.validateStockSearchFormSubmit(this)">
             
             <div id="container-input-txt">
                 <label id="ticker-search-val-lbl" for="ticker-search-txt-input" class="validation-input"></label>
-                <input id="ticker-search-txt-input" class="ac-ticker" type="text" placeholder="Tickers...." list="tickers-datalist" name="ticker" value="@Model.SelectedTicker" onkeyup="truthfullsApp.StockInfoPage.events.keyUpTickerSearchTxt(this)">
+                <input id="ticker-search-txt-input" class="ac-ticker" type="text" placeholder="Tickers...." list="tickers-datalist" name="ticker" value="@Model.SelectedTicker" onkeyup="E.keyUpTickerSearchTxt(this)">
                 <datalist id="tickers-datalist"> </datalist>
 
             </div>
               
             <div id="radio-tf">
-                <input type="radio" id="ticker-search-radio-daily" name="timeframe" value=1 onchange="truthfullsApp.StockInfoPage.events.timeFrameSelect(this)">
+                <input type="radio" id="ticker-search-radio-daily" name="timeframe" value=1 onchange="E.timeFrameSelect(this)">
                 <label for="radio-daily" style="margin-bottom:auto;">Daily</label><br>
-                <input type="radio" id="ticker-search-radio-weekly" name="timeframe" value=2 onchange="truthfullsApp.StockInfoPage.events.timeFrameSelect(this)">
+                <input type="radio" id="ticker-search-radio-weekly" name="timeframe" value=2 onchange="E.timeFrameSelect(this)">
                 <label for="radio-weekly" style="margin-bottom:auto;">Weekly</label><br>
             </div>
   
 
-            <label id ="ticker-duration-slct-lbl" for="duration-slct">Duration</label>
-            <select id="ticker-search-duration-slct" name="durationSlct" onchange="truthfullsApp.StockInfoPage.events.durationSlct(this)" onload="truthfullsApp.StockInfoPage.events.initDuration(this)">
+            <label id ="ticker-duration-slct-lbl" for="duration-slct">Duration(Years)</label>
+            <select id="ticker-search-duration-slct" name="durationSlct" onchange="E.events.durationSlct(this)" onload="E.initDuration(this)" class="margin-auto-r">
                 <option value="1" >1</option>
                 <option value="2">2</option>
                 <option value="5">5</option>
@@ -35,18 +36,20 @@
                 <option value="Max">Max</option>
             </select>
  
-            <input id="ticker-search-btn" type="submit" class="charcoal-background white-color"  value="Search" onsubmit="truthfullsApp.StockInfoPage.events.tickerSearch(this)">
+            <input id="ticker-search-btn" type="submit" class="dodger-blue-bg white-color margin-auto-r margin-auto-b" value="Search" onsubmit="E.tickerSearch(this)">
 
         </form>
          
     </div>
 
     <div id="chart-container" class="flex-container-c height-full width-full">
-        <div id="chart-tab">
-            <button class="chart-tab-btn" id="btn-chart" onclick="truthfullsApp.StockInfoPage.events.openTab(this)">Chart</button>
-            <button class="chart-tab-btn" id="btn-fundies" onclick="truthfullsApp.StockInfoPage.events.openTab(this)">Cross Asset Compare</button>
-            <button class="chart-tab-btn" id="btn-stats" onclick="truthfullsApp.StockInfoPage.events.openTab(this)">Gain Data</button>
+        <div id="chart-tab" class="width-full height-tenth">
+            <button class="fa fa-line-chart dodger-blue-bg chart-tab-btn tooltip" id="btn-chart" onclick="E.openTab(this)"></button>
+            <button class="chart-tab-btn fa fa-bar-chart-o dodger-blue-bg tooltip" id="btn-stats" onclick="E.openTab(this)"></button>
+            <button class="chart-tab-btn fa fa-clone dodger-blue-bg tooltip" id="btn-fundies" onclick="E.openTab(this)"></button>
         </div>
+
+
 
         <div id="chart-area" class="flex-container-c height-full width-full">
          
@@ -59,6 +62,8 @@
     <script type="text/javascript" src="~/js/StockIndex.js"> </script>
 
     <script type="text/javascript">
+
+        const E = truthfullsApp.StockInfoPage.events;
         docReady(function () {
             //load data into the application
             var data = {

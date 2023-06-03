@@ -4,8 +4,7 @@
 #ticker-search-input-container {
     display: flex;
     flex-direction: column;
-    width: 17%;
-    outline: 1px solid gold;
+    width: 15%;
     height: 100%;
 }
 
@@ -43,7 +42,6 @@
 
 #top-bar-search:hover {
     color: silver !important;
-    outline: 1px solid silver;
 }
 
 #tickers-list {
@@ -56,8 +54,8 @@
     outline: 1px solid green;
 }
 
-#chart-container{
-
+#chart-container {
+    outline: 1px solid #1E90FF;
 }
 
 svg{
@@ -65,21 +63,17 @@ svg{
 }
 
 #chart-tab{
-    display:flex;
-    flex-direction:row;
-    height:10%;
-    width:10%;
+
 }
 #chart-tab-btn{
-    background-color:cornflowerblue;
+
 }
 #btn-chart {
-    background-color: silver;
+
 }
 .chart-tab-btn:hover{
-    color:white;
+    background-color:royalblue;
 }
-
 
 #stats{
 
@@ -155,7 +149,4 @@ svg{
     
 }
 
-/*regular screens*/
-
-/*larger screens*/
 
