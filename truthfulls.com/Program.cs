@@ -15,7 +15,8 @@ var ss = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 //builder.Services.AddDbContext<StockContext>(o => o.UseSqlite(lite));
-builder.Services.AddTransient<IStockVMService, StockVMService>();
+builder.Services.AddScoped<IStockVMService, StockVMService>();
+builder.Services.AddMemoryCache();
 ConfigurationManager configuration = builder.Configuration;
 
 

@@ -1,1 +1,5 @@
-﻿
+﻿class Graphing {
+    constructor() {
+        e = ;
+    }
+}
