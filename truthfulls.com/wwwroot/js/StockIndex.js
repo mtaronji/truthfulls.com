@@ -1,5 +1,7 @@
 ﻿
-var truthfullsApp = {
+/// <reference path="../lib/Plotly/plotly.js" />
+
+truthfullsApp = {
 
     StockInfoPage:
     {
@@ -64,7 +66,8 @@ var truthfullsApp = {
             zeroData: onZeroData,
             plotData : onPlotData,
             plotPrices : onPlotPriceHistory,
-            plotGainsDistribution : onPlotGainsDistribution,
+            plotGainsDistribution: onPlotGainsDistribution,
+            plotCorrScatterPlot: onPlotCorrScatterPlot,
             
 
             //chart tab events
@@ -89,12 +92,9 @@ var truthfullsApp = {
     }
 }
 
-
-
 //make sure the page is ready for javascript.
 //supposed to replicate jquery ready
 function docReady(fn) {
-
     // see if DOM is already available
     if (document.readyState === "complete" || document.readyState === "interactive") {
         // call on next available tick
@@ -108,12 +108,13 @@ function initializeApp() {
     //set default values for some inputs
     truthfullsApp.StockInfoPage.events.setSelectedTimeFrame(truthfullsApp.StockInfoPage.state.selectedTimeFrame);
     truthfullsApp.StockInfoPage.events.setDuration(truthfullsApp.StockInfoPage.state.selectedDuration);
+    truthfullsApp.StockInfoPage.events.loadChartTab();
 
     for (let i = 0; i < truthfullsApp.StockInfoPage.data.tickers.length; i++) {
         var t = truthfullsApp.StockInfoPage.data.tickers[i];
         document.querySelector("#tickers-datalist").innerHTML += `<option>${t}</option>`
     }
-    //insert into datalist
+    
 }
 function onKeyUpTickerSearchTxt(event) {
     //check that input is good when user is done typing
@@ -202,7 +203,7 @@ function onPlotPriceHistory(ticker, d, w) {
         data = [{
             x: datalocation.wDates,
             close: datalocation.wCloses,
-            decreasing: { line: { color: '#7F7F7F' } },
+            decreasing: { line: { color: "rgba(255, 100, 102, 0.7)" } },
             high: datalocation.wHighs,
             inceasing: { line: { color: '#17BECF' } },
             line: { color: 'rgba(31,119,180,1)' },
@@ -236,7 +237,7 @@ function onPlotPriceHistory(ticker, d, w) {
         data = [{
             x: datalocation.dDates,
             close: datalocation.dClose,
-            decreasing: { line: { color: '#7F7F7F' } },
+            decreasing: { line: { color: "rgba(255, 100, 102, 0.7)" } },
             high: datalocation.dHighs,
             inceasing: { line: { color: '#17BECF' } },
             line: { color: 'rgba(31,119,180,1)' },
@@ -253,18 +254,20 @@ function onPlotPriceHistory(ticker, d, w) {
             xaxis: {
 
                 title: 'Dates',
-                type: 'date'
+                type: 'date',
+                rangeslider: {visible:false}
             },
             yaxis: {
 
                 type: 'linear',
                 title: 'Prices'
             },
-            title: `${ticker} -Daily Prices`
+            title: `${ticker} -Daily Prices`,
+ 
         };
     }
-
-    var config = { responsive: true }
+   
+    var config = { responsive: true}
 
     Plotly.newPlot('chart-area', data, layout, config);
 }
@@ -274,15 +277,18 @@ function onPlotGainsDistribution(ticker, d, w) {
     //plot a bellcurve for Gain data
     //it will be based on duration data
     let data = []
+    let title
     var datalocation = truthfullsApp.StockInfoPage.data;
     if (d) {
         for (let i = 0; i < datalocation.dGains.length; i++) {
             data[i] = datalocation.dGains[i] * 100.00;
         }
+        title = `${ticker} -Daily Gains Distribution`;
     }
     else if (w) {
         for (let i = 0; i < datalocation.wGains.length; i++) {
             data[i] = datalocation.wGains[i] * 100.00;
+            title = `${ticker} -Weekly Gains Distribution`;
         }
     }
 
@@ -302,7 +308,7 @@ function onPlotGainsDistribution(ticker, d, w) {
 
     var layout =
     {
-        title: `${ticker} -Daily Gains Distribution`,
+        title: title,
         xaxis:
         {
             title: "Percent Gains"
@@ -312,9 +318,14 @@ function onPlotGainsDistribution(ticker, d, w) {
             title: "Number of Occurences"
         }
     };
-
-    var config = { responsive: true };
+    
+    var config = { responsive: true, displayModeBar: false };
     Plotly.newPlot('chart-area', trace, layout, config);
+}
+
+function onPlotCorrScatterPlot() {
+    //build correlation scatter plot
+
 }
 function onOpentab(tabname) {
     //tab logic. Handle the switches between tabs here
@@ -335,9 +346,9 @@ function onOpentab(tabname) {
 function onLoadStatsTab() {
     truthfullsApp.StockInfoPage.state.currentChartFocus = truthfullsApp.StockInfoPage.ChartFocus.Gains;
 
-    document.querySelector("#btn-stats").style.backgroundColor = "silver";
-    document.querySelector("#btn-fundies").style.backgroundColor = "cornflowerblue";
-    document.querySelector("#btn-chart").style.backgroundColor = "cornflowerblue";
+    document.querySelector("#btn-stats").style.color = "silver";
+    document.querySelector("#btn-fundies").style.color = "black";
+    document.querySelector("#btn-chart").style.color = "black";
 
     truthfullsApp.StockInfoPage.events.plotData();
     window.dispatchEvent(new Event('resize'));
@@ -346,9 +357,9 @@ function onLoadStatsTab() {
 function onLoadFundiesTab() {
     truthfullsApp.StockInfoPage.state.currentChartFocus = truthfullsApp.StockInfoPage.ChartFocus.CrossAsset;
 
-    document.querySelector("#btn-fundies").style.backgroundColor = "silver";
-    document.querySelector("#btn-chart").style.backgroundColor = "cornflowerblue";
-    document.querySelector("#btn-stats").style.backgroundColor = "cornflowerblue";
+    document.querySelector("#btn-fundies").style.color = "silver";
+    document.querySelector("#btn-chart").style.color = "black";
+    document.querySelector("#btn-stats").style.color = "black";
 
     truthfullsApp.StockInfoPage.events.plotData();
     window.dispatchEvent(new Event('resize'));
@@ -357,9 +368,9 @@ function onLoadFundiesTab() {
 function onLoadChartTab() {
     truthfullsApp.StockInfoPage.state.currentChartFocus = truthfullsApp.StockInfoPage.ChartFocus.PriceChart;
 
-    document.querySelector("#btn-chart").style.backgroundColor = "silver";
-    document.querySelector("#btn-fundies").style.backgroundColor = "cornflowerblue";
-    document.querySelector("#btn-stats").style.backgroundColor = "cornflowerblue";
+    document.querySelector("#btn-chart").style.color = "silver";
+    document.querySelector("#btn-fundies").style.color = "black";
+    document.querySelector("#btn-stats").style.color = "black";
 
     truthfullsApp.StockInfoPage.events.plotData();
 

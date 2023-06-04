@@ -10,12 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-var lite = builder.Configuration.GetConnectionString("testdbl");
+var lite = builder.Configuration.GetConnectionString("develop");
 var ss = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddRazorPages();
 builder.Services.AddControllers();
 //builder.Services.AddDbContext<StockContext>(o => o.UseSqlite(lite));
-builder.Services.AddTransient<IStockVMService, StockVMService>();
+builder.Services.AddScoped<IStockVMService, StockVMService>();
+builder.Services.AddMemoryCache();
 ConfigurationManager configuration = builder.Configuration;
 
 

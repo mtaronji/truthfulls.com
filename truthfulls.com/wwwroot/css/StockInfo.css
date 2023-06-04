@@ -4,8 +4,7 @@
 #ticker-search-input-container {
     display: flex;
     flex-direction: column;
-    width: 17%;
-    outline: 1px solid gold;
+    width: 15%;
     height: 100%;
 }
 
@@ -43,7 +42,6 @@
 
 #top-bar-search:hover {
     color: silver !important;
-    outline: 1px solid silver;
 }
 
 #tickers-list {
@@ -56,8 +54,8 @@
     outline: 1px solid green;
 }
 
-#chart-container{
-
+#chart-container {
+    outline: 1px solid #1E90FF;
 }
 
 svg{
@@ -65,21 +63,15 @@ svg{
 }
 
 #chart-tab{
-    display:flex;
-    flex-direction:row;
-    height:10%;
-    width:10%;
+
 }
 #chart-tab-btn{
-    background-color:cornflowerblue;
-}
-#btn-chart {
-    background-color: silver;
-}
-.chart-tab-btn:hover{
-    color:white;
+
 }
 
+.chart-tab-btn:hover {
+    background-color: royalblue;
+}
 
 #stats{
 
@@ -91,49 +83,59 @@ svg{
 }
 /*phones and smaller screens*/
 @media (max-width:666px) {
+
     #page-stock-index {
         display: flex;
         flex-direction: column;
         height: 100%;
         width: 100%;
     }
-
-    #ticker-search-input-container {
-        display: flex;
-        flex-direction: row;
-        width: 100%;
-        height: 15%;
-        margin:auto;
-    }
-
-    #ticker-search-txt-input {
-        margin: auto;
+    #ticker-search-input-container{
+        display:flex;
+        flex-direction:column;
+        height:20%;
+        width:100%;
     }
     #form-ticker-search {
         display: flex;
         flex-direction: row;
         height: 100%;
         width: 100%;
-        margin: auto;
     }
 
-    #radio-tf{
-        font-size:15px;
-        font-family:'Times New Roman', Times, serif;
-        margin:auto;
+    #container-input-txt {
+        display: flex;
+        flex-direction: row;
+        width:20%;
+        height:auto;
+    }
+
+    #container-input-txt #ticker-search-txt-input {
+        width: 100%;
+        margin-bottom: auto;
+    }
+
+    #radio-tf {
+        font-size: 14px;
+        font-family: 'Times New Roman', Times, serif;
+        margin-right: auto;
+        margin-bottom: auto;
     }
     #ticker-duration-slct-lbl {
         font-family: 'Times New Roman', Times, serif;
-        font-size: 15px;
-        margin: auto;
+        font-size: 14px;
+
+        margin-right: auto;
+        margin-bottom: auto;
     }
     #ticker-search-duration-slct{
-        margin:auto;
+        margin-right:auto;
+        margin-bottom:auto;
     }
     #ticker-search-btn {
         margin-right:auto;
         margin-bottom:auto;
-        margin-top:auto;
+        margin-left:auto;
     }
     #chart-container {
         height:75%;
@@ -152,10 +154,11 @@ svg{
         height: 15%;
         width: 10%;
     }
+
+    .chart-tab-btn{
+        height:50%;
+    }
     
 }
 
-/*regular screens*/
-
-/*larger screens*/
 
