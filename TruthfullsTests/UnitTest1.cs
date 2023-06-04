@@ -27,7 +27,7 @@ namespace TruthfullsTests
 
             //set datasource to the correct location:
 
-            _stockVMService = new StockVMService("Data Source=test.db;");
+            _stockVMService = new StockVMService("Data Source=UnitTest.db;");
 
             //test state of the properties on get
             StockIndexModelOnGet = new(_stockVMService);
