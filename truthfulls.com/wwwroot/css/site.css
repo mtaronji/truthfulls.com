@@ -219,6 +219,7 @@ sidebar and content will be in this one*/
 
 .validation-lbl {
     font-family: Arial, Helvetica, sans-serif;
+    font-size:12px;
     color: orangered;
 }
 .popup {

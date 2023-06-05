@@ -60,8 +60,10 @@ var truthfullsApp = {
         selectedTimeFrame: {},
         selectedDuration: {},
         loadingCrossAsset: false,
+        crossAssetTicker: {},
         crossAssetLoaded: false,
-        changingDuration : true
+        changingDuration: true,
+        requestNewCrossAsset: false,
     },
 
     events:
@@ -89,6 +91,7 @@ var truthfullsApp = {
         openTab: onOpentab,
         loadStatsTab: onLoadStatsTab,
         loadFundiesTab: onLoadFundiesTab,
+        closeCrossAssetForm,
         loadChartTab: onLoadChartTab,
 
         searchCrossAssetCompare : onSearchCrossAssetCompare,
@@ -148,22 +151,33 @@ function onValidateStockSearchForm(event) {
     let formid = document.getElementById(event.id);
     let input = formid.getElementsByClassName("ticker-input-txt")[0].value.trim().toUpperCase();
     let validationlabel = formid.parentNode.getElementsByClassName("validation-lbl")[0];
+
+    if (event.id == 'form-ticker-search') {
+        truthfullsApp.state.currentChartFocus = truthfullsApp.state.ChartFocus;
+    }
+    else {
+
+    }
     
     if (truthfullsApp.data.tickers.includes(input)) {
-        truthfullsApp.state.selectedTicker = input;
         validationlabel.innerHTML = "";
 
         if (truthfullsApp.state.currentChartFocus == truthfullsApp.state.ChartFocus.CrossAsset) {
+            truthfullsApp.state.crossAssetTicker = input;
             truthfullsApp.state.loadingCrossAsset = true;
             onRequestNewStockData();
-            return false; //return false to prevent default behavior of refreshing page
+            truthfullsApp.events.plotData();
+            return false; 
+        }
+        else {
+            truthfullsApp.state.selectedTicker = input;
         }
 
         return true;
     }
     else {
         //print validation message on label
-        validationlabel.innerHTML = "Ticker is not available";
+        validationlabel.innerHTML = "Ticker is not available <br>";
     }
     return false;
 }
@@ -199,6 +213,7 @@ function onValidateTicker() {
     }
      else if (currentFocus == truthfullsApp.state.ChartFocus.CrossAsset) {
          onPlotCorrScatterPlot();
+         closeCrossAssetForm();
     }   
 }
 
@@ -269,7 +284,7 @@ function onPlotPriceHistory() {
 
                 title: 'Dates',
                 type: 'date',
-                rangeslider: {visible:false}
+                rangeslider: { visible: false }
             },
             yaxis: {
 
@@ -277,14 +292,15 @@ function onPlotPriceHistory() {
                 title: 'Prices'
             },
             title: `${selectedTicker} -Daily Prices`,
- 
+
         };
     }
-   
-    var config = { responsive: true}
+
+    var config = { responsive: true, displayModeBar: false }
 
     Plotly.newPlot('chart-area', data, layout, config);
 }
+
 
 function onPlotGainsDistribution() {
 
@@ -340,66 +356,73 @@ function onPlotGainsDistribution() {
     Plotly.newPlot('chart-area', trace, layout, config);
 }
 
-function onPlotCorrScatterPlot() {
-    //if you are loading the assets or it's already loaded. You can stay. If not leave
-    if (truthfullsApp.state.loadingCrossAsset || truthfullsApp.state.crossAssetLoaded) {
-
-    }
-    else {
-        return;
-    }
-
-
-    //plot a correlation scatterplot using input from the currently selected ticker and another one
+function onPlotCorrScatterPlot() {      
+   
     let dataspace = truthfullsApp.data;
     let timeframe = truthfullsApp.state.selectedTimeFrame;
     let tracet1 = [];
     let tracet2 = [];
     let d = [];
 
+    var pl_colorscale = [
+        [0.0, '#19d3f3'],
+        [0.333, '#19d3f3'],
+        [0.333, '#e763fa'],
+        [0.666, '#e763fa'],
+        [0.666, '#636efa'],
+        [1, '#636efa']
+    ]
+
+  
+    var config = { responsive: true, displayModeBar: false };
+
     if (timeframe == truthfullsApp.state.TimeFrame.Daily) {
-         tracet1 = {
-             x: dataspace.dDatesX,
-             y: dataspace.dCloseX,
-             type: 'scatter',
-             mode: 'markers'
-        };
-        tracet2 = {
-            x: dataspace.dDates,
-            y: dataspace.dClose,
+
+        d = [{
+            
+            mode: 'markers',
             type: 'scatter',
-            mode: 'markers'
-        };
-        d = [tracet1, tracet2];
+            x: dataspace.dGains,
+            y: dataspace.dGainsX,
+            color: 'rgb(218, 165, 32)',
+            marker: {
+                color: 'rgb(218,165,32)',
+                size: 4,
+            }
+        }]
+
+
     }
 
     else if (timeframe == truthfullsApp.state.TimeFrame.Weekly) {
-        tracet1 = {
-            x: dataspace.wDatesX,
-            y: dataspace.wClosesX,
+        d = [{
+
+            mode: 'markers',
             type: 'scatter',
-            mode: 'markers'
-        };
-        tracet2 = {
-            x: dataspace.wDates,
-            y: dataspace.wCloses,
-            type: 'scatter',
-            mode: 'markers'
-        };
-        d = [tracet1, tracet2];
+            x:dataspace.dGains, 
+            y: dataspace.dGainsX,
+            marker: {
+                color: 'rgb(218,165,32)',
+                size: 4,
+            }
+        }]
     }
 
-    Plotly.newPlot('chart-area', d);
-
-    closeCrossAssetForm();
+    var layout = {
+        title: `Correlation Data - ${truthfullsApp.state.selectedTicker} vs ${truthfullsApp.state.crossAssetTicker}`,
+        autosize: true,
+        hovermode: 'closest',
+        dragmode: 'select'
+    }
+    Plotly.newPlot('chart-area', d, layout, config);
 }
 
 function closeCrossAssetForm() {
+
     truthfullsApp.state.loadingCrossAsset = false;
     truthfullsApp.state.crossAssetLoaded = true;
     e = document.getElementById("crossasset-form");
     e.style.display = "none"; e.style.visibility = 'hidden';
-
 }
 
 function onOpentab(tabname) {
@@ -469,18 +492,35 @@ function onDurationSlct(event) {
     if (isNaN(parsed)) { duration = 500; } else { duration = parsed; }
 
     //configure state
-    truthfullsApp.state.crossAssetLoaded = false;
     truthfullsApp.state.changingDuration = true;
     truthfullsApp.state.currentChartFocus = truthfullsApp.state.ChartFocus.PriceChart;
     truthfullsApp.state.selectedDuration = duration;
 
+    if (truthfullsApp.data.tickers.includes(truthfullsApp.state.crossAssetTicker)) {
+        truthfullsApp.state.loadingCrossAsset = true;
+    }
+
+    //if we have cross asset data selected load new time range for the cross asset
+    if (truthfullsApp.state.loadingCrossAsset == true) {
+        truthfullsApp.events.requestNewStockData();
+        truthfullsApp.state.loadingCrossAsset = false;
+    }
     truthfullsApp.events.requestNewStockData();
+    truthfullsApp.events.plotData();
+
     truthfullsApp.events.loadChartTab();
 
 }
 
 function onRequestNewStockData() {
-    let ticker = truthfullsApp.state.selectedTicker;
+    let ticker;
+    if (truthfullsApp.state.loadingCrossAsset == true) {
+        ticker = truthfullsApp.state.crossAssetTicker;
+    }
+    else {
+        ticker = truthfullsApp.state.selectedTicker;
+    }
+
     let duration = truthfullsApp.state.selectedDuration;
     focus = truthfullsApp.state.currentChartFocus;
 
@@ -488,10 +528,7 @@ function onRequestNewStockData() {
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
 
-            //reload the new data and plot the chart again
-
             truthfullsApp.data.setNewPriceData(JSON.parse(this.responseText));
-            truthfullsApp.events.plotData();
         }
     };
 
@@ -503,8 +540,7 @@ function setSelectedDuration() {
     truthfullsApp.state.changingDuration = true;
     var duration = truthfullsApp.state.selectedDuration;
     document.querySelector("#ticker-search-duration-slct").value = duration;
-    let e = document.getElementById("btn-chart");
-    e.click();
+    let e = document.getElementById("btn-chart"); e.click();
 }
 
 //ACCEPTS JSON data
@@ -521,7 +557,7 @@ function onSetNewPriceData(jsondata) {
     let focus = jsondata["selectedchart"];
 
     //if we are here to fill the cross asset data, fit it and then leave
-    if (focus == truthfullsApp.state.ChartFocus.CrossAsset) {
+    if (truthfullsApp.state.loadingCrossAsset == true) {
 
         for (let i = 0; i < dailyData.length; i++) {
             truthfullsApp.data.dDatesX.push(dailyData[i]["date"]);
@@ -629,6 +665,17 @@ function onZeroData() {
         truthfullsApp.data.wOpensX.length = 0; truthfullsApp.data.wGainsX.length = 0;
         return;
     }
+    //if we are changing duration and have data loaded into the cross asset. keep it there. It's time range will not change as the primary ticker will.
+    else if (truthfullsApp.state.changingDuration == true && truthfullsApp.data.dCloseX.length > 0) {
+        truthfullsApp.data.dClose.length = 0; truthfullsApp.data.dDates.length = 0;
+        truthfullsApp.data.dHighs.length = 0; truthfullsApp.data.dLows.length = 0;
+        truthfullsApp.data.dOpens.length = 0; truthfullsApp.data.dGains.length = 0;
+
+
+        truthfullsApp.data.wCloses.length = 0; truthfullsApp.data.wDates.length = 0;
+        truthfullsApp.data.wHighs.length = 0; truthfullsApp.data.wLows.length = 0;
+        truthfullsApp.data.wOpens.length = 0; truthfullsApp.data.wGains.length = 0;
+    }
     else {
         truthfullsApp.data.dClose.length = 0; truthfullsApp.data.dDates.length = 0;
         truthfullsApp.data.dHighs.length = 0; truthfullsApp.data.dLows.length = 0;
@@ -651,6 +698,7 @@ function onZeroData() {
 }
 
 function onSearchCrossAssetCompare(event) {
+    //disable the search button. we don't want to really submit to the server. We want to get the data async
     event.preventDefault();
 }
 
