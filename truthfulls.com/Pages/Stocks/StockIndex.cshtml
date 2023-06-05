@@ -10,25 +10,24 @@
 
     <div id="ticker-search-input-container">
 
-        <form id="form-ticker-search" asp-page-handler="GetPrices" method="post" class="flex-container-c height-quarter width-full" onsubmit="return E.validateStockSearchFormSubmit(this)">
+        <form id="form-ticker-search" asp-page-handler="GetPrices" method="post" class="flex-container-c height-quarter width-full" onsubmit="return truthfullsApp.events.validateStockSearchFormSubmit(this)">
             
             <div id="container-input-txt">
-                <label id="ticker-search-val-lbl" for="ticker-search-txt-input" class="validation-input"></label>
-                <input id="ticker-search-txt-input" class="ac-ticker" type="text" placeholder="Tickers...." list="tickers-datalist" name="ticker" value="@Model.SelectedTicker" onkeyup="E.keyUpTickerSearchTxt(this)">
+                <label for="ticker-search-txt-input" class="validation-lbl"></label>
+                <input id="ticker-search-txt-input" class="ticker-input-txt" type="text" placeholder="Tickers...." list="tickers-datalist" name="ticker" value="@Model.SelectedTicker" onkeyup="truthfullsApp.events.keyUpTickerSearchTxt(this)">
                 <datalist id="tickers-datalist"> </datalist>
-
             </div>
               
             <div id="radio-tf">
-                <input type="radio" id="ticker-search-radio-daily" name="timeframe" value=1 onchange="E.timeFrameSelect(this)">
+                <input type="radio" id="ticker-search-radio-daily" name="timeframe" value=1 onchange="truthfullsApp.events.timeFrameSelect(this)">
                 <label for="radio-daily" style="margin-bottom:auto;">Daily</label><br>
-                <input type="radio" id="ticker-search-radio-weekly" name="timeframe" value=2 onchange="E.timeFrameSelect(this)">
+                <input type="radio" id="ticker-search-radio-weekly" name="timeframe" value=2 onchange="truthfullsApp.events.timeFrameSelect(this)">
                 <label for="radio-weekly" style="margin-bottom:auto;">Weekly</label><br>
             </div>
   
 
             <label id ="ticker-duration-slct-lbl" for="duration-slct">Duration(Years)</label>
-            <select id="ticker-search-duration-slct" name="durationSlct" onchange="E.events.durationSlct(this)" onload="E.initDuration(this)" class="margin-auto-r">
+            <select id="ticker-search-duration-slct" name="durationSlct" onchange="truthfullsApp.events.durationSlct(this)" onload="truthfullsApp.events.initDuration(this)" class="margin-auto-r">
                 <option value="1" >1</option>
                 <option value="2">2</option>
                 <option value="5">5</option>
@@ -36,7 +35,7 @@
                 <option value="Max">Max</option>
             </select>
  
-            <input id="ticker-search-btn" type="submit" class="dodger-blue-bg white-color margin-auto-r margin-auto-b" value="Search" onsubmit="E.tickerSearch(this)">
+            <input id="ticker-search-btn" type="submit" class="dodger-blue-bg white-color margin-auto-r margin-auto-b" value="Search" onsubmit="truthfullsApp.events.tickerSearch(this)">
 
         </form>
          
@@ -44,17 +43,30 @@
 
     <div id="chart-container" class="flex-container-c height-full">
         <div id="chart-tab" class="width-full height-tenth">
-            <button class="chart-tab-btn fa fa-line-chart dodger-blue-bg" id="btn-chart" onclick="E.openTab(this)"></button>
-            <button class="chart-tab-btn fa fa-bar-chart-o dodger-blue-bg" id="btn-stats" onclick="E.openTab(this)"></button>
-            <button class="chart-tab-btn fa fa-clone dodger-blue-bg" id="btn-fundies" onclick="E.openTab(this)"></button>
+            <a class="chart-tab-btn fa fa-line-chart dodger-blue-bg" id="btn-chart" onclick="truthfullsApp.events.openTab(this)"></a>
+            <a class="chart-tab-btn fa fa-bar-chart-o dodger-blue-bg" id="btn-stats" onclick="truthfullsApp.events.openTab(this)"></a>
+            <a class="chart-tab-btn fa fa-clone dodger-blue-bg" id="btn-fundies" onclick="truthfullsApp.events.openTab(this)" href="#crossasset-form">    </a>
         </div>
 
-
+        <a></a>
+       
 
         <div id="chart-area" class="flex-container-c height-full width-full">
          
      
         </div>
+    </div>
+
+    <div id="crossasset-form" class="popup-container" >
+        <form id="form-ticker-search-cross-asset-compare" class="reveal-modal" onsubmit="return truthfullsApp.events.validateStockSearchFormSubmit(this)">
+            <label for="ticker-searchca-txt-input" class="validation-lbl"></label>
+            <label>Enter a ticker for Cross Asset Compare </label>
+            <input id="ticker-searchca-txt-input" class="ticker-input-txt" type="text" placeholder="Tickers...." list="tickers-datalist" name="ticker" value="@Model.SelectedTicker" onkeyup="truthfullsApp.events.keyUpTickerSearchTxt(this)">
+            <datalist id="tickers-datalist"> </datalist>
+            <input id="ticker-search-btn" type="submit" class="dodger-blue-bg white-color margin-auto-r margin-auto-b" value="Search" onsubmit="truthfullsApp.events.searchCrossAssetCompare(this)">
+            <a href="#" class="close-reveal-modal red-color" onclick="truthfullsApp.events.closePopup(this)">X</a>
+        </form>
+
     </div>
 </div>
 
@@ -62,8 +74,7 @@
     <script type="text/javascript" src="~/js/StockIndex.js"> </script>
 
     <script type="text/javascript">
-
-        const E = truthfullsApp.StockInfoPage.events;
+        
         docReady(function () {
             //load data into the application
             var data = {
@@ -74,14 +85,14 @@
                 };
 
             //setup the app
-            truthfullsApp.StockInfoPage.data.setNewPriceData(data);
-            truthfullsApp.StockInfoPage.data.tickers = @Json.Serialize(Model.Tickers);
-            truthfullsApp.StockInfoPage.state.selectedTicker = @Json.Serialize(@Model.SelectedTicker);
-            truthfullsApp.StockInfoPage.state.currentChartFocus = truthfullsApp.StockInfoPage.ChartFocus.PriceChart;
-            truthfullsApp.StockInfoPage.state.selectedTimeFrame = @Json.Serialize(Model.TimeframeType);
-            truthfullsApp.StockInfoPage.state.selectedDuration = @Json.Serialize(Model.Duration);
-            truthfullsApp.StockInfoPage.init();
-            truthfullsApp.StockInfoPage.events.plotData();
+            truthfullsApp.data.setNewPriceData(data);
+            truthfullsApp.data.tickers = @Json.Serialize(Model.Tickers);
+            truthfullsApp.state.selectedTicker = @Json.Serialize(@Model.SelectedTicker);
+            truthfullsApp.state.currentChartFocus = truthfullsApp.state.ChartFocus.PriceChart;
+            truthfullsApp.state.selectedTimeFrame = @Json.Serialize(Model.TimeframeType);
+            truthfullsApp.state.selectedDuration = @Json.Serialize(Model.Duration);
+            truthfullsApp.init();
+            truthfullsApp.events.plotData();
         });
     </script>
 }

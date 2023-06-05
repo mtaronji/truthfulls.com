@@ -24,7 +24,9 @@ body {
 .green-color {
     color: green;
 }
-
+.red-color{
+    color:red;
+}
 .green-background {
     background-color: green;
 }
@@ -199,6 +201,42 @@ sidebar and content will be in this one*/
 #table-ticker  tr:hover {
     outline:1px solid silver;
     color:black;
+}
+
+.popup-container {
+    display: none;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    visibility: hidden;
+    background-color: rgba(22,22,22,0.5); /* complimenting your modal colors */
+}
+
+.popup-container:target {
+    visibility: visible;
+    display: block;
+}
+
+.validation-lbl {
+    font-family: Arial, Helvetica, sans-serif;
+    color: orangered;
+}
+.popup {
+    position: fixed;
+    display: none;
+}
+
+.reveal-modal {
+    background: #e1e1e1;
+    margin: 0 auto;
+    width: 160px;
+    position: relative;
+    z-index: 41;
+    top: 25%;
+    padding: 30px;
+    -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    -moz-box-shadow: 0 0 10px rgba(0,0,0,0.4);
+    box-shadow: 0 0 10px rgba(0,0,0,0.4);
 }
 
 
