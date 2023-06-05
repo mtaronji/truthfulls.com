@@ -410,6 +410,16 @@ function onPlotCorrScatterPlot() {
 
     var layout = {
         title: `Correlation Data - ${truthfullsApp.state.selectedTicker} vs ${truthfullsApp.state.crossAssetTicker}`,
+        xaxis: {
+            title: {
+                text:`${truthfullsApp.state.selectedTicker}`
+            }
+        },
+        yaxis: {
+            title: {
+                text: `${truthfullsApp.state.crossAssetTicker}`
+            }
+        },
         autosize: true,
         hovermode: 'closest',
         dragmode: 'select'
