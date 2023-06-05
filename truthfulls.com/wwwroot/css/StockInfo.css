@@ -77,9 +77,14 @@ svg{
 
 }
 
-.validation-input {
-    font-family: Arial, Helvetica, sans-serif;
-    color: orangered;
+
+
+.tickerSearchVal{
+
+}
+
+.tickerSearchForm{
+
 }
 /*phones and smaller screens*/
 @media (max-width:666px) {
@@ -107,7 +112,7 @@ svg{
         display: flex;
         flex-direction: row;
         width:20%;
-        height:auto;
+        height:20%;
     }
 
     #container-input-txt #ticker-search-txt-input {
@@ -137,26 +142,14 @@ svg{
         margin-bottom:auto;
         margin-left:auto;
     }
-    #chart-container {
+    /*#chart-container {
         height:75%;
         width:100%;
     }
-
-    #chart-area {
-        display: block;
+*/
+/   #chart-area {
         width: 100%;
-        height: 100%;
-    }
-
-    #chart-tab {
-        display: flex;
-        flex-direction: row;
-        height: 15%;
-        width: 10%;
-    }
-
-    .chart-tab-btn{
-        height:50%;
+        height:95%;
     }
     
 }

@@ -6,7 +6,7 @@ namespace truthfulls.com.Controllers
 {
 
     //return all the daily price data for the ticker
-    
+    [ApiController]
     public class TickerController : Controller
     {
         private IStockVMService stockVMService { get; } = null!;
@@ -18,8 +18,8 @@ namespace truthfulls.com.Controllers
 
         //needs input of the ticker, timeframe as well as the duration of the data
         [HttpGet]
-        [Route("[controller]/{name:alpha}/{duration?}")]
-        public async Task<JsonResult> GetAsync(string name, int duration)
+        [Route("[controller]/{name:alpha}/{duration?}/{focus?}")]
+        public async Task<JsonResult> GetAsync(string name, int duration, int focus)
         {
             //check if the ticker is in the database
 
@@ -30,7 +30,10 @@ namespace truthfulls.com.Controllers
             var result2 = await stockVMService.GetWeeklyPricesAsync(name, duration);
             var result3 = await stockVMService.GetDailyGainsAsync(name, duration);
             var result4 = await stockVMService.GetWeeklyGainsAsync(name, duration);
-            return Json(new { dailyprices = result1, weeklyprices = result2, dailygains = result3, weeklygains = result4 });
+            var j = Json(new {dailyprices = result1, weeklyprices = result2, dailygains = result3, weeklygains = result4, selectedchart = focus });
+            //var j = Json(new {selectedchart = focus });
+
+            return j;
         }
     }
 
