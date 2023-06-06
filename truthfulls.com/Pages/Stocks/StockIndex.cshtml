@@ -45,7 +45,7 @@
         <div id="chart-tab" class="width-full height-tenth">
             <a class="chart-tab-btn fa fa-line-chart dodger-blue-bg" id="btn-chart" onclick="truthfullsApp.events.openTab(this)"></a>
             <a class="chart-tab-btn fa fa-bar-chart-o dodger-blue-bg" id="btn-stats" onclick="truthfullsApp.events.openTab(this)"></a>
-            <a class="chart-tab-btn fa fa-clone dodger-blue-bg" id="btn-fundies" onclick="truthfullsApp.events.openTab(this)" href="#crossasset-form">    </a>
+            <a class="chart-tab-btn fa fa-clone dodger-blue-bg" id="btn-fundies" onclick="truthfullsApp.events.openTab(this)" href="#crossasset-form-container">    </a>
         </div>
 
         <a></a>
@@ -57,7 +57,7 @@
         </div>
     </div>
 
-    <div id="crossasset-form" class="popup-container" >
+    <div id="crossasset-form-container" class="popup-container" >
         <form id="form-ticker-search-cross-asset-compare" class="reveal-modal" onsubmit="return truthfullsApp.events.validateStockSearchFormSubmit(this)">
             <label class="validation-lbl"></label>
             <label>Enter a ticker for Cross Asset Compare </label>
@@ -72,10 +72,11 @@
 
 @section Scripts{
     <script type="text/javascript" src="~/js/StockIndex.js"> </script>
-
+    <script type="text/javascript" src="~/js/graphing.js"> </script>
     <script type="text/javascript">
-        
+   
         docReady(function () {
+          
             //load data into the application
             var data = {
                 weeklygains : @Json.Serialize(Model.WeeklyGains),

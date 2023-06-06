@@ -1,5 +1,6 @@
 ﻿
-/// <reference path="../lib/Plotly/plotly.js" />
+
+///<reference path="../lib/Plotly/plotly.js" />
 
 var truthfullsApp = {
 
@@ -142,44 +143,41 @@ function onKeyUpTickerSearchTxt(event) {
        //print validation message on label
         validationlabel.innerHTML = "Ticker is not available";
     } 
+   
 }
 
-
-
 function onValidateStockSearchForm(event) {
-
+    //this validate can come from 2 forms. One on cross asset search, one on the primary ticker
     let formid = document.getElementById(event.id);
     let input = formid.getElementsByClassName("ticker-input-txt")[0].value.trim().toUpperCase();
     let validationlabel = formid.parentNode.getElementsByClassName("validation-lbl")[0];
+    let isCrossAsset = (event.id == 'form-ticker-search-cross-asset-compare');
+    let isPriceHistory = (event.id == 'form-ticker-search');
 
-    if (event.id == 'form-ticker-search') {
-        truthfullsApp.state.currentChartFocus = truthfullsApp.state.ChartFocus;
-    }
-    else {
-
-    }
-    
+    //validation logic
     if (truthfullsApp.data.tickers.includes(input)) {
         validationlabel.innerHTML = "";
-
-        if (truthfullsApp.state.currentChartFocus == truthfullsApp.state.ChartFocus.CrossAsset) {
-            truthfullsApp.state.crossAssetTicker = input;
-            truthfullsApp.state.loadingCrossAsset = true;
-            onRequestNewStockData();
-            truthfullsApp.events.plotData();
-            return false; 
-        }
-        else {
-            truthfullsApp.state.selectedTicker = input;
-        }
-
-        return true;
     }
     else {
         //print validation message on label
         validationlabel.innerHTML = "Ticker is not available <br>";
+        return false;
     }
-    return false;
+
+    if (isCrossAsset) {
+        truthfullsApp.state.crossAssetTicker = input;
+        truthfullsApp.state.loadingCrossAsset = true;
+        onRequestNewStockData();
+        truthfullsApp.events.plotData();
+        closeCrossAssetForm("crossasset-form-container");
+        //return false to prevent data page reload
+        return false;
+    }
+    else {
+        truthfullsApp.state.selectedTicker = input;
+    }
+    return true;
+ 
 }
 function onValidateTicker() {
     var tickers = truthfullsApp.StockInfoPage.data.tickers;
@@ -213,7 +211,6 @@ function onValidateTicker() {
     }
      else if (currentFocus == truthfullsApp.state.ChartFocus.CrossAsset) {
          onPlotCorrScatterPlot();
-         closeCrossAssetForm();
     }   
 }
 
@@ -427,11 +424,11 @@ function onPlotCorrScatterPlot() {
     Plotly.newPlot('chart-area', d, layout, config);
 }
 
-function closeCrossAssetForm() {
+function closeCrossAssetForm(id) {
 
     truthfullsApp.state.loadingCrossAsset = false;
     truthfullsApp.state.crossAssetLoaded = true;
-    e = document.getElementById("crossasset-form");
+    e = document.getElementById(id);
     e.style.display = "none"; e.style.visibility = 'hidden';
 }
 
@@ -544,7 +541,6 @@ function onRequestNewStockData() {
 
     xhttp.open("GET", `/ticker/${ticker}/${duration}/${focus}`, false);
     xhttp.send();  
-
 }
 function setSelectedDuration() {
     truthfullsApp.state.changingDuration = true;
