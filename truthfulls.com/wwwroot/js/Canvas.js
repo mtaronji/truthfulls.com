@@ -1,5 +1,0 @@
-﻿class Graphing {
-    constructor() {
-        e = ;
-    }
-}

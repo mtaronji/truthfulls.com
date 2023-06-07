@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Content Remove="wwwroot\Data\truthfulls.db" />
-    <Content Remove="wwwroot\js\graphing.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,10 +49,6 @@
   <ItemGroup>
     <Folder Include="Areas\" />
     <Folder Include="Migrations\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Include="wwwroot\js\graphing.ts" />
   </ItemGroup>
 
 </Project>

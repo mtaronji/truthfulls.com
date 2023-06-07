@@ -212,10 +212,10 @@ sidebar and content will be in this one*/
     background-color: rgba(22,22,22,0.5); /* complimenting your modal colors */
 }
 
-.popup-container:target {
+/*.popup-container:target {
     visibility: visible;
     display: block;
-}
+}*/
 
 .validation-lbl {
     font-family: Arial, Helvetica, sans-serif;
