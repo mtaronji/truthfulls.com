@@ -1,205 +1,277 @@
-"use strict";
-//list of all states where you cause a plotting event in the interface.
-//callback function is the instructions you do when being asked to plot.
-Object.defineProperty(exports, "__esModule", { value: true });
-var Plotly = require("plotly.js");
-var LoadingDurationState = /** @class */ (function () {
-    function LoadingDurationState(selected) {
-        this.requestNewPriceData = true;
-        this.callBackPlot = loadingDurationCallback;
-        this.crossAssetHasBeenSelected = selected;
-        this.requestCrossAssetData = selected;
-    }
-    return LoadingDurationState;
-}());
-var ChartPricesState = /** @class */ (function () {
-    function ChartPricesState() {
-        this.onLoad = false;
-        this.requestCrossAssetData = false;
-        this.requestNewPriceData = true;
-        this.crossAssetHasBeenSelected = false;
-        this.callBackPlot = chartPriceCallback;
-    }
-    return ChartPricesState;
-}());
-var ChartGainsDistState = /** @class */ (function () {
-    function ChartGainsDistState() {
-        this.requestCrossAssetData = false;
-        this.callBackPlot = chartgainsDistCallback;
-    }
-    return ChartGainsDistState;
-}());
-var ChartCrossAssetState = /** @class */ (function () {
-    function ChartCrossAssetState() {
-        this.callBackPlot = chartCrossAssetCallback;
-    }
-    return ChartCrossAssetState;
-}());
-//when a chart button is clicked.
-var ChartingContext = /** @class */ (function () {
-    function ChartingContext(chartState) {
-        this.currentState = chartState;
-    }
-    ChartingContext.prototype.setChartState = function (newstate) {
-        this.currentState = newstate;
-    };
-    ChartingContext.prototype.plot = function () {
-        this.currentState.callBackPlot;
-    };
-    return ChartingContext;
-}());
-//callback instructions for plot event given the state
-function chartPriceCallback(state) {
-    //request data
-    //input new data
-    //plotchart
-    //shift control back to the interface
-    var data = RequestNewStockData(state.selectedTicker, state.selectedDuration);
-    PlotPriceHistory(data, state);
+export function IState() {
+    this.isweekly;
+    this.isdaily;
+    this.duration;
+    this.datastore;
+    this.selectedticker;
+    this.crossassetticker;
+    this.CrossAssetLoaded;
+    this.updatepricedata;
+    this.updatepricedatax;
+    this.callback;
+   
 }
-function chartgainsDistCallback(state) {
+
+
+export var InitialState = function (store) {
+
+    this.isweekly = store["isweekly"];
+    this.isdaily = store["isdaily"];
+    this.duration = store["duration"];
+    this.datastore = store;
+    this.selectedticker = store["selectedticker"];
+    this.CrossAssetLoaded = false;
+    this.crossassetticker = store.crossassetticker;
+    this.callback = PlotPriceHistory;
+
+};
+
+export var PriceChartState = function (state) {
+    this.isweekly = state.isweekly;
+    this.isdaily = state.isdaily;
+    this.duration = state.duration;
+    this.datastore = state.datastore;
+    this.selectedticker = state.selectedticker;
+    this.CrossAssetLoaded = state.CrossAssetLoaded;
+    this.crossassetticker = state.crossassetticker;
+    this.callback = PlotPriceHistory;
+};
+export var GainsDistState = function (state) {
+    this.isweekly = state.isweekly;
+    this.isdaily = state.isdaily;
+    this.duration = state.duration;
+    this.datastore = state.datastore;
+    this.selectedticker = state.selectedticker;
+    this.CrossAssetLoaded = state.CrossAssetLoaded;
+    this.crossassetticker = state.crossassetticker;
+    this.callback = PlotGainsDistribution;
+};
+
+export var LoadTimeFrameState = function (state) {
+    this.isweekly = state.isweekly;
+    this.isdaily = state.isdaily;
+    this.duration = state.duration;
+    this.datastore = state.datastore;
+    this.selectedticker = state.selectedticker;
+    this.CrossAssetLoaded = state.CrossAssetLoaded;
+    this.crossassetticker = state.crossassetticker;
+
+    this.callback = PlotPriceHistory;
 }
-function loadingDurationCallback(state) {
+export var LoadCrossAsset = function (state) {
+    this.isweekly = state.isweekly;
+    this.isdaily = state.isdaily;
+    this.duration = state.duration;
+    this.datastore = state.datastore;
+    this.selectedticker = state.selectedticker;
+    this.CrossAssetLoaded = true;
+    this.crossassetticker = state.crossassetticker;
+    this.callback = PlotCorrScatterPlot;
 }
-function chartCrossAssetCallback(state) {
+export var ChartContext = function (Cstate) {
+
+    let _state = Cstate;
+    this.Plot = function () {
+        _state.callback(_state);
+    }
+    this.SetState = function (state) {
+        _state = state;
+    }
+    this.UpdateData = function () {
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                let temp = JSON.parse(this.responseText);
+                _state.datastore["weeklyprices"] = temp["weeklyprices"];
+                _state.datastore["dailyprices"] = temp["dailyprices"];
+                _state.datastore["dailygains"] = temp["dailygains"];
+                _state.datastore["weeklygains"] = temp["weeklygains"];
+
+            }
+        };
+        xhttp.open("GET", "/ticker/".concat(_state.selectedticker, "/").concat(_state.duration), false);
+        xhttp.send();
+    }
+
+    this.UpdateDataX = function () {
+        let xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                let temp = JSON.parse(this.responseText);
+                _state.datastore["weeklypricesX"] = temp["weeklyprices"];
+                _state.datastore["dailypricesX"] = temp["dailyprices"];
+                _state.datastore["dailygainsX"] = temp["dailygains"];
+                _state.datastore["weeklygainsX"] = temp["weeklygains"];
+
+            }
+        };
+        xhttp.open("GET", "/ticker/".concat(_state.crossassetticker, "/").concat(_state.duration), false);
+        xhttp.send();
+    }
+    return this;
 }
-//--------------------------------------------------------------
-//helper functions
-//pull data from our web api
-function RequestNewStockData(ticker, duration) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            return JSON.parse(this.responseText);
-        }
-    };
-    xhttp.open("GET", "/ticker/".concat(ticker, "/").concat(duration), false);
-    xhttp.send();
-}
-function PlotPriceHistory(data, state) {
-    //config chart settings here
+
+function PlotPriceHistory(state) {
+
     var layout = {};
-    if (state.isWeekly) {
+    var data = [];
+    if (state.isdaily) {
         data = [{
-                x: data["dailyprices"]["date"],
-                close: data["dailyprices"]["close"],
-                decreasing: { line: { color: "rgba(255, 100, 102, 0.7)" } },
-                high: data["dailyprices"]["high"],
-                inceasing: { line: { color: '#17BECF' } },
-                line: { color: 'rgba(31,119,180,1)' },
-                open: data["dailyprices"]["open"],
-                low: data["dailyprices"]["low"],
-                type: 'ohlc',
-                xaxis: 'x',
-                yaxis: 'y'
-            }];
+            x: UnpackModelData("date", state.datastore["dailyprices"]),
+            close: UnpackModelData("close", state.datastore["dailyprices"]),
+            decreasing: { line: { color: "rgba(255, 100, 102, 0.7)" } },
+            high: UnpackModelData("high", state.datastore["dailyprices"]),
+            inceasing: { line: { color: '#17BECF' } },
+            line: { color: 'rgba(31,119,180,1)' },
+            open: UnpackModelData("open", state.datastore["dailyprices"]),
+            low: UnpackModelData("low", state.datastore["dailyprices"]),
+            type: 'ohlc',
+            xaxis: 'x',
+            yaxis: 'y'
+        }];
         // Define Layout
         layout =
-            {
-                showlegend: false,
-                xaxis: {
-                    title: 'Dates',
-                    type: 'date',
-                    rangeslider: { visible: false }
-                },
-                yaxis: {
-                    type: 'linear'
-                },
-                title: "".concat(state.selectedTicker, " -Weekly Prices")
-            };
+        {
+            showlegend: false,
+            xaxis: {
+                title: 'Dates',
+                type: 'date',
+                rangeslider: { visible: false }
+            },
+            yaxis: {
+                type: 'linear'
+            },
+            title: "".concat(state.selectedticker, " -Daily Prices")
+        };
     }
-    else if (state.isDaily) {
+    else if (state.isweekly) {
         data = [{
-                x: data["weeklyData"]["date"],
-                close: data["weeklyData"]["close"],
-                decreasing: { line: { color: "rgba(255, 100, 102, 0.7)" } },
-                high: data["weeklyData"]["high"],
-                inceasing: { line: { color: '#17BECF' } },
-                line: { color: 'rgba(31,119,180,1)' },
-                open: data["weeklyData"]["open"],
-                low: data["weeklyData"]["low"],
-                type: 'ohlc',
-                xaxis: 'x',
-                yaxis: 'y'
-            }];
+            x: UnpackModelData("weekEnd", state.datastore["weeklyprices"]),
+            close: UnpackModelData("close", state.datastore["weeklyprices"]),
+            decreasing: { line: { color: "rgba(255, 100, 102, 0.7)" } },
+            high: UnpackModelData("high", state.datastore["weeklyprices"]),
+            inceasing: { line: { color: '#17BECF' } },
+            line: { color: 'rgba(31,119,180,1)' },
+            open: UnpackModelData("open", state.datastore["weeklyprices"]),
+            low: UnpackModelData("low", state.datastore["weeklyprices"]),
+            type: 'ohlc',
+            xaxis: 'x',
+            yaxis: 'y'
+        }];
         layout =
-            {
-                showlegend: false,
-                xaxis: {
-                    title: 'Dates',
-                    type: 'date',
-                    rangeslider: { visible: false }
-                },
-                yaxis: {
-                    type: 'linear',
-                    title: 'Prices'
-                },
-                title: "".concat(state.selectedTicker, " -Daily Prices"),
-            };
+        {
+            showlegend: false,
+            xaxis: {
+                title: 'Dates',
+                type: 'date',
+                rangeslider: { visible: false }
+            },
+            yaxis: {
+                type: 'linear',
+                title: 'Prices'
+            },
+            title: "".concat(state.selectedticker, " -Weekly Prices")
+        };
     }
     var config = { responsive: true, displayModeBar: false };
-    Plotly.newPlot(state.chartAreaID, data, layout, config);
+    Plotly.newPlot("chart-area", data, layout, config);
 }
-function SetNewPriceData(jsondata) {
-    ////zero data then repopulate
-    //truthfullsApp.events.zeroData();
-    //let dailyData = jsondata["dailyprices"];
-    //let weeklyData = jsondata["weeklyprices"];
-    //let dailyGData = jsondata["dailygains"];
-    //let WeeklyGData = jsondata["weeklygains"];
-    //let focus = jsondata["selectedchart"];
-    ////if we are here to fill the cross asset data, fit it and then leave
-    //if (truthfullsApp.state.loadingCrossAsset == true) {
-    //    for (let i = 0; i < dailyData.length; i++) {
-    //        truthfullsApp.data.dDatesX.push(dailyData[i]["date"]);
-    //        truthfullsApp.data.dCloseX.push(dailyData[i]["close"]);
-    //        truthfullsApp.data.dHighsX.push(dailyData[i]["high"]);
-    //        truthfullsApp.data.dLowsX.push(dailyData[i]["low"]);
-    //        truthfullsApp.data.dOpensX.push(dailyData[i]["open"]);
-    //    }
-    //    //relead the weekly data
-    //    for (let i = 0; i < weeklyData.length; i++) {
-    //        truthfullsApp.data.wDatesX.push(weeklyData[i]["weekEnd"]);
-    //        truthfullsApp.data.wClosesX.push(weeklyData[i]["close"]);
-    //        truthfullsApp.data.wHighsX.push(weeklyData[i]["high"]);
-    //        truthfullsApp.data.wLowsX.push(weeklyData[i]["low"]);
-    //        truthfullsApp.data.wOpensX.push(weeklyData[i]["open"]);
-    //    }
-    //    //reload the daily gain data
-    //    for (let i = 0; i < dailyGData.length; i++) {
-    //        truthfullsApp.data.dGainsX.push(dailyGData[i]["gain"]);
-    //    }
-    //    //reload the weekly gain data
-    //    for (let i = 0; i < WeeklyGData.length; i++) {
-    //        truthfullsApp.data.wGainsX.push(WeeklyGData[i]["gain"]);
-    //    }
-    //    return;
-    //}
-    //else {
-    //    for (let i = 0; i < dailyData.length; i++) {
-    //        truthfullsApp.data.dDates.push(dailyData[i]["date"]);
-    //        truthfullsApp.data.dClose.push(dailyData[i]["close"]);
-    //        truthfullsApp.data.dHighs.push(dailyData[i]["high"]);
-    //        truthfullsApp.data.dLows.push(dailyData[i]["low"]);
-    //        truthfullsApp.data.dOpens.push(dailyData[i]["open"]);
-    //    }
-    //    //relead the weekly data
-    //    for (let i = 0; i < weeklyData.length; i++) {
-    //        truthfullsApp.data.wDates.push(weeklyData[i]["weekEnd"]);
-    //        truthfullsApp.data.wCloses.push(weeklyData[i]["close"]);
-    //        truthfullsApp.data.wHighs.push(weeklyData[i]["high"]);
-    //        truthfullsApp.data.wLows.push(weeklyData[i]["low"]);
-    //        truthfullsApp.data.wOpens.push(weeklyData[i]["open"]);
-    //    }
-    //    //reload the daily gain data
-    //    for (let i = 0; i < dailyGData.length; i++) {
-    //        truthfullsApp.data.dGains.push(dailyGData[i]["gain"]);
-    //    }
-    //    //reload the weekly gain data
-    //    for (let i = 0; i < WeeklyGData.length; i++) {
-    //        truthfullsApp.data.wGains.push(WeeklyGData[i]["gain"]);
-    //    }
-    //}
-    //readload the daily data
+function UnpackModelData(key, arr) {
+    let d = [];
+    for (var i = 0; i < arr.length; i++) {
+        var temp = arr[i][key];
+        d.push(temp);
+    }
+    return d;
 }
-//# sourceMappingURL=graphing.js.map
+function PlotCorrScatterPlot(state) {
+
+        let d = [];
+        var pl_colorscale = [
+            [0.0, '#19d3f3'],
+            [0.333, '#19d3f3'],
+            [0.333, '#e763fa'],
+            [0.666, '#e763fa'],
+            [0.666, '#636efa'],
+            [1, '#636efa']
+        ]
+        var config = { responsive: true, displayModeBar: false };
+        if (state.isdaily) {
+            d = [{
+                mode: 'markers',
+                type: 'scatter',
+                x: UnpackModelData("gain",state.datastore["dailygains"]),
+                y: UnpackModelData("gain", state.datastore["dailygainsX"]),
+                color: 'rgb(218, 165, 32)',
+                marker: {
+                    color: 'rgb(218,165,32)',
+                    size: 4,
+                }
+            }]
+        }
+        else if (state.isweekly) {
+            d = [{
+                mode: 'markers',
+                type: 'scatter',
+                x: UnpackModelData("gain", state.datastore["weeklygains"]),
+                y: UnpackModelData("gain", state.datastore["weeklygainsX"]),
+                marker: {
+                    color: 'rgb(218,165,32)',
+                    size: 4,
+                }
+            }]
+        }
+        var layout = {
+            title: `Correlation Data - ${state.selectedticker} vs ${state.crossassetticker}`,
+            xaxis: {
+                title: {
+                    text: "Selected Ticker"
+                }
+            },
+            yaxis: {
+                title: {
+                    text: "Cross Asset Ticker"
+                }
+            },
+            autosize: true,
+            hovermode: 'closest',
+            dragmode: 'select'
+        }
+        Plotly.newPlot('chart-area', d, layout, config);
+}
+
+export function PlotGainsDistribution(state) {
+
+    let data = [];
+    if (state.isdaily) { data = UnpackModelData("gain", state.datastore["dailygains"]); } else if (state.isweekly) {data = UnpackModelData("gain", state.datastore["weeklygains"]); } else { }
+    var trace = [
+        {
+            x: data,
+            type: 'histogram',
+            histnorm: 'count',
+            marker: {
+                color: "rgba(255, 100, 102, 0.7)",
+                line: {
+                    color: "rgba(255, 100, 102, 1)",
+                    width: 1
+                }
+            }
+        }
+    ];
+    var layout = {
+        title: "Gains Distribution for ".concat(state.selectedticker),
+        xaxis: {
+            title: "Percent Gains"
+        },
+        yaxis: {
+            title: "Number of Occurences"
+        }
+    };
+    var config = { responsive: true, displayModeBar: false };
+
+    Plotly.newPlot("chart-area", trace, layout, config);
+}
+
+//**************************************************************** */
+//initial load
+

@@ -52,6 +52,8 @@ namespace truthfulls.com.Pages
 
 
         public bool WeeklyChk { get; set; }
+        public bool IsDaily { get; set; }
+        public bool IsWeekly { get; set; }
         //_______________
         public List<DailyPriceVM> DailyPrices { get; set; } = null!;
 
@@ -124,7 +126,9 @@ namespace truthfulls.com.Pages
             this.SelectedTicker = DefaultTicker;
             this.Duration = "5";
             this.TimeframeType = Timeframe.Daily;
-            
+            this.IsWeekly = (this.TimeframeType == Timeframe.Weekly);
+            this.IsDaily = (this.TimeframeType == Timeframe.Daily);
+
             this.Tickers = await this._StockVMService.GetTickersAsync();
 
             this.DailyPrices = await this._StockVMService.GetDPricesAsync(this.SelectedTicker, int.Parse(this.Duration));

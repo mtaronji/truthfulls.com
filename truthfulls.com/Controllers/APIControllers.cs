@@ -18,7 +18,7 @@ namespace truthfulls.com.Controllers
 
         //needs input of the ticker, timeframe as well as the duration of the data
         [HttpGet]
-        [Route("[controller]/{name:alpha}/{duration?}/{focus?}")]
+        [Route("[controller]/{name:alpha}/{duration}/{focus?}")]
         public async Task<JsonResult> GetAsync(string name, int duration, int focus)
         {
             //check if the ticker is in the database
