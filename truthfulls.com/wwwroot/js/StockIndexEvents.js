@@ -32,7 +32,7 @@ function LoadEventListeners() {
     document.querySelector("#ticker-search-duration-slct").addEventListener('change', DurationSlct);
     document.querySelector("#ticker-searchca-txt-input").addEventListener("keyup", KeyUpTickerSearchTxt);
     document.querySelector("#btn-fundies").addEventListener("click", ShowCrossAssetForm);
-    document.querySelector("#crossassetExit").addEventListener("click", closeCrossAssetForm);
+    document.querySelector("#crossassetexit").addEventListener("click", CloseCrossAssetForm);
     
     let nodes = document.getElementsByClassName("chart-tab-btn");
     for (let i = 0; i < nodes.length; i++) { nodes[i].addEventListener('click', OpenTab); }
@@ -44,9 +44,9 @@ function ShowCrossAssetForm() {
     e.style.display = 'block';
     e.style.visibility = 'visible';
 }
-function closeCrossAssetForm(id) {
+function CloseCrossAssetForm(event) {
 
-    let e = document.getElementById(id);
+    let e = document.getElementById("crossasset-form-container");
     e.style.display = "none"; e.style.visibility = 'hidden';
 }
 function SetSelectedDuration(value) {
@@ -82,18 +82,21 @@ function ValidateStockSearchForm(event) {
     }
     else {
         //print validation message on label
-        validationlabel.innerHTML = "Ticker is not available <br>";
-        event.preventDefault();
+        validationlabel.innerHTML = "Ticker is not available <br>"
+        validationPassed = false;
+        return false;
     }
 
     //we don't want cross assset form being posted.
     //we handle in the search button click
+    //
     if (isCrossAsset) {
         currentState.crossassetticker = input;
         let id = { currentTarget: { id: "btn-fundies-validated" } };
         OpenTab(id);
         event.preventDefault();
     }
+    return true;
 }
 function ValidateTicker() {
     var tickers = truthfullsApp.StockInfoPage.data.tickers;
@@ -128,7 +131,7 @@ function OpenTab(event) {
             LoadStatsTab();
             break;
         case "btn-fundies-validated":
-            closeCrossAssetForm("crossasset-form-container");
+            CloseCrossAssetForm();
             var newState = new Graph.LoadCrossAsset(currentState);
             currentState = newState;
             context.SetState(currentState);
@@ -197,6 +200,7 @@ function DurationSlct(event) {
     currentState.duration = duration;
     context.SetState(currentState);
     context.UpdateData();
+    context.UpdateDataX();
     context.Plot();
 
 }

@@ -1,72 +1,76 @@
-export function IState() {
-    this.isweekly;
-    this.isdaily;
-    this.duration;
-    this.datastore;
-    this.selectedticker;
-    this.crossassetticker;
-    this.CrossAssetLoaded;
-    this.updatepricedata;
-    this.updatepricedatax;
-    this.callback;
-   
+
+export class IState{
+    isweekly;
+    isdaily;
+    duration;
+    datastore;
+    selectedticker;
+    crossassetticker;
+    CrossAssetLoaded;
+    updatepricedata;
+    updatepricedatax;
+    callback;
+
+    constructor() {
+
+    }
+    setState = function (state) {
+        this.isweekly = state.isweekly;
+        this.isdaily = state.isdaily;
+        this.duration = state.duration;
+        this.datastore = state.datastore;
+        this.selectedticker = state.selectedticker;
+        this.CrossAssetLoaded = state.CrossAssetLoaded;
+        this.crossassetticker = state.crossassetticker;
+    }
+
+    setStore = function (store) {
+        this.isweekly = store["isweekly"];
+        this.isdaily = store["isdaily"];
+        this.duration = store["duration"];
+        this.datastore = store;
+        this.selectedticker = store["selectedticker"];
+        this.CrossAssetLoaded = false;
+        this.crossassetticker = store.crossassetticker;
+        
+    }
 }
-
-
-export var InitialState = function (store) {
-
-    this.isweekly = store["isweekly"];
-    this.isdaily = store["isdaily"];
-    this.duration = store["duration"];
-    this.datastore = store;
-    this.selectedticker = store["selectedticker"];
-    this.CrossAssetLoaded = false;
-    this.crossassetticker = store.crossassetticker;
-    this.callback = PlotPriceHistory;
-
+export class InitialState extends IState{
+    constructor(store) {
+        super();
+        this.setStore(store);
+        this.callback = PlotPriceHistory;
+    }
+};
+export class PriceChartState extends IState {
+    constructor(state) {
+        super();
+        this.setState(state);
+        this.callback = PlotPriceHistory;
+    }
+};
+export class GainsDistState extends IState {
+    constructor(state) {
+        super();
+        this.setState(state);
+        this.callback = PlotGainsDistribution;
+    }
 };
 
-export var PriceChartState = function (state) {
-    this.isweekly = state.isweekly;
-    this.isdaily = state.isdaily;
-    this.duration = state.duration;
-    this.datastore = state.datastore;
-    this.selectedticker = state.selectedticker;
-    this.CrossAssetLoaded = state.CrossAssetLoaded;
-    this.crossassetticker = state.crossassetticker;
-    this.callback = PlotPriceHistory;
-};
-export var GainsDistState = function (state) {
-    this.isweekly = state.isweekly;
-    this.isdaily = state.isdaily;
-    this.duration = state.duration;
-    this.datastore = state.datastore;
-    this.selectedticker = state.selectedticker;
-    this.CrossAssetLoaded = state.CrossAssetLoaded;
-    this.crossassetticker = state.crossassetticker;
-    this.callback = PlotGainsDistribution;
-};
-
-export var LoadTimeFrameState = function (state) {
-    this.isweekly = state.isweekly;
-    this.isdaily = state.isdaily;
-    this.duration = state.duration;
-    this.datastore = state.datastore;
-    this.selectedticker = state.selectedticker;
-    this.CrossAssetLoaded = state.CrossAssetLoaded;
-    this.crossassetticker = state.crossassetticker;
-
-    this.callback = PlotPriceHistory;
+export class LoadTimeFrameState extends IState {
+    constructor(state) {
+        super();
+        this.setState(state);
+        this.callback = PlotPriceHistory;
+    }
 }
-export var LoadCrossAsset = function (state) {
-    this.isweekly = state.isweekly;
-    this.isdaily = state.isdaily;
-    this.duration = state.duration;
-    this.datastore = state.datastore;
-    this.selectedticker = state.selectedticker;
-    this.CrossAssetLoaded = true;
-    this.crossassetticker = state.crossassetticker;
-    this.callback = PlotCorrScatterPlot;
+export class LoadCrossAsset extends IState {
+    constructor(state) {
+        super();
+        this.setState(state);
+        this.callback = PlotCorrScatterPlot;
+        this.CrossAssetLoaded = true;
+    }
 }
 export var ChartContext = function (Cstate) {
 
@@ -94,6 +98,7 @@ export var ChartContext = function (Cstate) {
     }
 
     this.UpdateDataX = function () {
+        if (!_state.CrossAssetLoaded) { return; }
         let xhttp = new XMLHttpRequest();
         xhttp.onreadystatechange = function () {
             if (this.readyState == 4 && this.status == 200) {

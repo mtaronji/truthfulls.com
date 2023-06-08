@@ -111,7 +111,7 @@ svg{
     #container-input-txt {
         display: flex;
         flex-direction: row;
-        width:20%;
+        width:30%;
         height:20%;
     }
 

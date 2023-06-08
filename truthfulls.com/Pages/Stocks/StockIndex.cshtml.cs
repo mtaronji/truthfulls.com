@@ -79,6 +79,8 @@ namespace truthfulls.com.Pages
             if (ticker.IsNullOrEmpty()) throw new ArgumentException("Ticker must have a Value");
 
             this.TimeframeType = (Timeframe) timeframe;
+            this.IsWeekly = (this.TimeframeType == Timeframe.Weekly);
+            this.IsDaily = (this.TimeframeType == Timeframe.Daily);
 
             //try casting the string from the select input, if it can't be cast correctly, set the duration for 1
             int castDuration = 1;
