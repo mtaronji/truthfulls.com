@@ -49,9 +49,18 @@ namespace truthfulls.com.ViewModel
         Quarterly = 4,
         Yearly = 5
     }
-
-    public class CanvasVM
+    //consecutive daily gains
+    public class CDGainsVM
     {
+        public string GainDate { get; set; } = null!;
+        public long Gaincount { get; set; }
+    }
+    
+    //consecutive weekly gains
+    public class CWGainsVM
+    {
+    public string Weekending { get; set; } = null!;
+    public long Gaincount { get; set; }
     }
 
     

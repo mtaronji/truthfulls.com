@@ -1,0 +1,40 @@
+with gdata as (
+    select row_number() over (order by p.[date]) as gainrownum, p.[date],
+    p.[close]/lag(p.[close]) over (order by p.[date]) * 1.0 - 1 as Gain
+    from Price p
+    where p.[ticker] = 'SPY' and 
+    p.[date] > DATE('NOW', '-5 YEARS')
+),
+PGains as (
+    select * from gdata gd
+    where gd.Gain > 0.0
+),
+NGains as (
+    select * from gdata gd
+    where gd.Gain < 0.0
+),
+ENDP as (
+    select t.* from (
+    select pg.gainrownum, lead(pg.[gainrownum]) over (order by pg.[date]) nxtrow, pg.[date]
+    from pgains pg) t
+    where t.nxtrow - t.gainrownum > 1
+),
+cGains as(
+select pg.[date], ep.gainrownum - pg.gainrownum + 1 as gainstreak
+from PGAINS pg,ENDP ep
+where ep.[date] >= pg.[date]
+group by pg.[date] 
+),
+denom as (
+    select count(*) from cgains
+),
+
+gainsNStreak as (
+    select cg.[date], pg.Gain, cg.gainstreak
+    from cgains cg
+    inner join pgains pg
+    on(pg.[date] = cg.[date])
+)
+
+
+

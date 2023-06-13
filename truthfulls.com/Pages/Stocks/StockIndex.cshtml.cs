@@ -58,6 +58,9 @@ namespace truthfulls.com.Pages
         public List<DailyPriceVM> DailyPrices { get; set; } = null!;
 
         public List<WeeklyPriceVM> WeeklyPrices { get; set; } = null!;
+
+        public List<CWGainsVM> CWGains { get; set; }
+        public List<CDGainsVM> CDGains { get; set; }
       
         //public List<DailyPriceVM> MonthlyPrices { get; set; } 
         //public List<DailyPriceVM> QuarterlyPrices { get; set; } 
@@ -119,6 +122,8 @@ namespace truthfulls.com.Pages
             this.WeeklyPercentageUp = (decimal)this.WPostiveGains.Count / (this.WPostiveGains.Count + this.WNegativeGains.Count);
             this.WeeklyPercentageDown = (decimal)this.WNegativeGains.Count / (this.WPostiveGains.Count + this.WNegativeGains.Count);
 
+            
+
             return Page();
         }
 
@@ -160,6 +165,8 @@ namespace truthfulls.com.Pages
             this.WNegativeGains = this.WeeklyGains.Where(g => g.Gain < 0.0M).Select(g => g.Gain).ToList<decimal>();
             this.WeeklyPercentageUp = (decimal)this.WPostiveGains.Count / (this.WPostiveGains.Count + this.WNegativeGains.Count);
             this.WeeklyPercentageDown = (decimal)this.WNegativeGains.Count / (this.WPostiveGains.Count + this.WNegativeGains.Count);
+
+            this.CDGains = await this._StockVMService.GetDailyConsecutivePGainsAsync(this.SelectedTicker, int.Parse(this.Duration));
 
         }
     }

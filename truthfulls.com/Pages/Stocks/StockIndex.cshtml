@@ -46,6 +46,7 @@
             <a class="chart-tab-btn fa fa-line-chart dodger-blue-bg" id="btn-chart"></a>
             <a class="chart-tab-btn fa fa-bar-chart-o dodger-blue-bg" id="btn-stats" ></a>
             <a class="chart-tab-btn fa fa-clone dodger-blue-bg" id="btn-fundies">    </a>
+            <a class="chart-tab-btn fa fa-area-chart dodger-blue-bg" id="btn-poisson">    </a>
         </div>
 
         <a></a>
@@ -55,6 +56,9 @@
          
      
         </div>
+       
+
+
     </div>
 
     <div id="crossasset-form-container" class="popup-container" >
@@ -74,6 +78,7 @@
     <script type="module" src="~/js/plotly.js"> </script>
     <script type="module" src="~/js/graphing.js"></script>
     <script type="module" src="~/js/StockIndexEvents.js"> </script>
+    <script type="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.js" integrity="sha384-8JJEhHkwY0VI06p7huKe7LqvYgDhSS69qJxWSQGwlB8FmDnAgPKgZGk5Ui0VyuNH" crossorigin="anonymous"></script>
     
     <script type="text/javascript">
 
@@ -84,13 +89,19 @@
         'weeklyprices': @Json.Serialize(Model.WeeklyPrices),
         'dailygains': @Json.Serialize(Model.DailyGains),
         'weeklygains': @Json.Serialize(Model.WeeklyGains),
+        'cdailygains': @Json.Serialize(Model.CDGains),
         'tickers': @Json.Serialize(Model.Tickers),
         'selectedticker': @Json.Serialize(Model.SelectedTicker),
         'duration': @Json.Serialize(Model.Duration),
         'isdaily': @Json.Serialize(Model.IsDaily),
         'isweekly': @Json.Serialize(Model.IsWeekly),
-        'timeframe': @Json.Serialize((int)Model.TimeframeType)
+        'timeframe': @Json.Serialize((int)Model.TimeframeType),
+        'percentupD': @Json.Serialize(Model.DailyPercentageUp),
+        'percentupW': @Json.Serialize(Model.WeeklyPercentageUp)
+
          };
+
+
 
     </script>
 
@@ -98,10 +109,6 @@
 
     
 
-<script type="text/javascript">
-
-</script>
-}
 
 @section Styles {
    <link rel="stylesheet" href="~/css/StockInfo.css"/>

@@ -21,19 +21,16 @@ namespace truthfulls.com.Services
         public Task<List<string>> GetTickersAsync();
         public Task<List<DailyGainsVM>> GetDailyGainsAsync(string ticker, int duration);
         public Task<List<WeeklyGainsVM>> GetWeeklyGainsAsync(string ticker, int duration);
-        public  Task<List<decimal>> GetDCGainsAsync(string ticker);
-        public Task<List<decimal>> GetDCLossesAsync(string ticker);
-        //public List<decimal> GetWCGains(string ticker);
-        //public List<string> GetWCLosses(string ticker);
-
         public Task<List<WeeklyPriceVM>> GetWeeklyPricesAsync(string ticker, int duration);
+        public Task<List<CWGainsVM>> GetWeeklyConsecutivePGainsAsync(string ticker, int duration);
+        public Task<List<CDGainsVM>> GetDailyConsecutivePGainsAsync(string ticker, int duration);
 
     }
 
     public class StockVMService : IStockVMService
     {
-        SqlConnectionStringBuilder builder;
-        IMemoryCache _cache;
+        readonly SqlConnectionStringBuilder builder;
+        readonly IMemoryCache _cache;
 
         public StockVMService(IConfiguration config, IMemoryCache cache)
         {
@@ -203,19 +200,6 @@ namespace truthfulls.com.Services
             return weeklygains;
         }
 
-        public async Task<List<decimal>> GetCGainsAsync(string ticker)
-        {
-            ticker.ToUpper();
-            var CGains = new List<decimal>();
-            return CGains;
-        }
-        public async Task<List<decimal>> GetCLossesAsync(string ticker)
-        {
-
-            var CLosses = new List<decimal>();
-            return CLosses;
-        }
-
         public async Task<List<WeeklyPriceVM>> GetWeeklyPricesAsync(string ticker, int duration)
         {
             ticker.ToUpper();
@@ -259,50 +243,75 @@ namespace truthfulls.com.Services
             return weeklyPrices;
         }
 
-        public async Task<List<decimal>> GetDCGainsAsync(string ticker)
+        public async Task<List<CDGainsVM>> GetDailyConsecutivePGainsAsync(string ticker, int duration)
         {
             ticker.ToUpper();
-            var CGains = new List<decimal>();
+            var cgains = new List<CDGainsVM>();
+            string queryString = SQLiteQueries.DailyConsecutivePGains(ticker, duration);
+            try
+            {
+                using (var connection = new SqliteConnection(this.builder.ConnectionString))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = queryString;
 
-            //string queryString = SQLiteQueries.Gains(ticker);
-            //try
-            //{
-            //    using (var connection = new SqliteConnection(this.builder.ConnectionString))
-            //    {
-            //        connection.Open();
-            //        var command = connection.CreateCommand();
-            //        command.CommandText = queryString;
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (reader.Read())
+                        {
+                            //multiplying my 2 decimal places to ensure no multiplication errors. Some numbers can get cast to int if they aren't supplied decimals
+                            var cdg = new CDGainsVM()
+                            {
+                                GainDate = reader.GetDateTime(0).ToString("yyyy-MM-dd"),
+                                Gaincount = reader.GetInt64(1)
+                            };
 
-            //        using (var reader = await command.ExecuteReaderAsync())
-            //        {
-            //            while (reader.Read())
-            //            {
-            //                var wp = new WeeklyPriceVM()
-            //                {
-            //                    WeekStart = reader.GetDateTime(0).ToString("yyyy-MM-dd"),
-            //                    WeekEnd = reader.GetDateTime(1).ToString("yyyy-MM-dd"),
-            //                    High = reader.GetDecimal(2),
-            //                    Low = reader.GetDecimal(3),
-            //                    Volume = reader.GetInt64(4),
-            //                    Open = reader.GetDecimal(5),
-            //                    Close = reader.GetDecimal(6)
-            //                };
-            //                weeklyPrices.Add(wp);
-            //            }
-            //            reader.Close();
-            //        }
-            //    }
-            //}
-            //catch (SqlException ex) { Console.WriteLine(ex.Message); }
+                            cgains.Add(cdg);
+
+                        }
+                        reader.Close();
+                    }
+                }
+            }
+            catch (SqlException ex) { Console.WriteLine(ex.Message); }
 
 
-            return CGains;
+            
+            return cgains;
         }
-        public async Task<List<decimal>> GetDCLossesAsync(string ticker)
+        public async Task<List<CWGainsVM>> GetWeeklyConsecutivePGainsAsync(string ticker, int duration)
         {
             ticker.ToUpper();
-            var CLosses = new List<decimal>();
-            return CLosses;
+            var cgains = new List<CWGainsVM>();
+            string queryString = SQLiteQueries.WeeklyConsecutivePGains(ticker, duration);
+            try
+            {
+                using (var connection = new SqliteConnection(this.builder.ConnectionString))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = queryString;
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (reader.Read())
+                        {
+                            var cwg = new CWGainsVM()
+                            {
+                               Weekending = reader.GetDateTime(0).ToString("yyyy-MM-dd"),
+                               Gaincount = reader.GetInt64(1)
+                            };
+
+                            cgains.Add(cwg);
+
+                        }
+                        reader.Close();
+                    }
+                }
+            }
+            catch (SqlException ex) { Console.WriteLine(ex.Message); }
+            return cgains;
         }
 
 

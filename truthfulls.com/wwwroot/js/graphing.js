@@ -1,4 +1,5 @@
-
+//*Istate represents all the possible states of the application interface. When events happen, this state changes. 
+//Depending on the chart button clicked, we will initiate a plot that might be different.
 export class IState{
     isweekly;
     isdaily;
@@ -10,6 +11,7 @@ export class IState{
     updatepricedata;
     updatepricedatax;
     callback;
+
 
     constructor() {
 
@@ -35,6 +37,7 @@ export class IState{
         
     }
 }
+//initial state represents the state of the application when the page is loaded. In this case, we are plotting price history.
 export class InitialState extends IState{
     constructor(store) {
         super();
@@ -42,6 +45,7 @@ export class InitialState extends IState{
         this.callback = PlotPriceHistory;
     }
 };
+//when the chart button is clicked, we will plot the price history
 export class PriceChartState extends IState {
     constructor(state) {
         super();
@@ -49,6 +53,7 @@ export class PriceChartState extends IState {
         this.callback = PlotPriceHistory;
     }
 };
+//if gains distribution is clicked, the state of the application changes and we plot the gains distribution.
 export class GainsDistState extends IState {
     constructor(state) {
         super();
@@ -57,13 +62,21 @@ export class GainsDistState extends IState {
     }
 };
 
+export class GammaDistState extends IState {
+    constructor(state) {
+        super();
+        this.setState(state);
+        this.callback = PlotGammaDistribution;
+    }
+}
+
 export class LoadTimeFrameState extends IState {
     constructor(state) {
         super();
         this.setState(state);
         this.callback = PlotPriceHistory;
     }
-}
+};
 export class LoadCrossAsset extends IState {
     constructor(state) {
         super();
@@ -71,7 +84,9 @@ export class LoadCrossAsset extends IState {
         this.callback = PlotCorrScatterPlot;
         this.CrossAssetLoaded = true;
     }
-}
+};
+
+//this is the object that will do the plotting based on the input of state. This object also updates the data when necessary(as an example when the duration changes)
 export var ChartContext = function (Cstate) {
 
     let _state = Cstate;
@@ -90,6 +105,8 @@ export var ChartContext = function (Cstate) {
                 _state.datastore["dailyprices"] = temp["dailyprices"];
                 _state.datastore["dailygains"] = temp["dailygains"];
                 _state.datastore["weeklygains"] = temp["weeklygains"];
+                _state.datastore["percentupD"] = temp["percentupD"];
+                _state.datastore["percentupW"] = temp["percentupW"];
 
             }
         };
@@ -245,7 +262,7 @@ function PlotCorrScatterPlot(state) {
         Plotly.newPlot('chart-area', d, layout, config);
 }
 
-export function PlotGainsDistribution(state) {
+function PlotGainsDistribution(state) {
 
     let data = [];
     if (state.isdaily) { data = UnpackModelData("gain", state.datastore["dailygains"]); } else if (state.isweekly) {data = UnpackModelData("gain", state.datastore["weeklygains"]); } else { }
@@ -280,3 +297,84 @@ export function PlotGainsDistribution(state) {
 //**************************************************************** */
 //initial load
 
+//
+function PlotGammaDistribution(state) {
+    let timeframestring;
+    let rate;
+    if (state.isdaily) {
+        timeframestring = "Daily";
+        rate = state.datastore["percentupD"];
+    }
+    else if (state.isweekly) {
+        timeframestring = "Weekly";
+        rate = state.datastore["percentupW"];
+    }
+    //let alpha(a) represent here the amount of gains expected.
+    //let4 gfa represent the output from the gamma function
+    let alphas = [];
+    alphas.push(1,2, 3, 5, 10);
+
+    let startX = 0.0; let dx = 0.2;
+
+    let alltracex = [];
+    let alltracey = [];
+
+    for (let i = 0; i < alphas.length; i++) {
+        let tx = [];
+        let ty = [];
+        for (let x = 0.0; x <= 40;) {
+            ty.push(GammaPDF(rate, alphas[i], x));
+            tx.push(x);
+            x = x + 0.25;
+        }
+        alltracex.push(tx);
+        alltracey.push(ty);
+    }
+
+    let traces = [];
+
+    for (let i = 0; i < alltracex.length; i++) {
+        let t = {
+            x: alltracex[i],
+            y: alltracey[i],
+            type: 'spline',
+            name: "Alpha = " + alphas[i]  
+        };
+        traces.push(t);
+    }
+    let layout;
+    layout = {
+        title: timeframestring + " Arrival times of a gain.",
+        xaxis: {
+            title: 'Arrival Time -' + timeframestring,
+            showgrid: false,
+            zeroline: false
+        },
+        yaxis: {
+            title: 'Probability by arrival Time',
+            showline: false
+        }
+    };
+
+    Plotly.newPlot('chart-area', traces, layout); 
+}
+
+//numeric calculation of the gamma function
+function GammaFunction(z, dt,iter) {
+    if (z <= 0) {
+        //validation error. Return on print
+        alert("incorrect gamma function input");
+    }
+    let area = 0.0;
+    let t = 0.0;
+    for (let i = 0; i < iter; i++) {
+        area = area + Math.pow(t, z - 1) * Math.pow(Math.E, -t) * dt;
+        t = t + dt;
+    }
+    return area;
+}
+
+function GammaPDF(rate, alpha, x) {
+    let gf = GammaFunction(alpha, 0.001, 15000);
+    return Math.pow(rate, alpha) / (gf) * Math.pow(x, alpha - 1) * Math.pow(Math.E, -rate * x);
+}

@@ -14,6 +14,8 @@ docReady(function () {
     
     context = new Graph.ChartContext(currentState);
     context.Plot();
+
+
 });
 function LoadDataList() {
     let e = document.querySelector("#tickers-datalist");
@@ -33,6 +35,7 @@ function LoadEventListeners() {
     document.querySelector("#ticker-searchca-txt-input").addEventListener("keyup", KeyUpTickerSearchTxt);
     document.querySelector("#btn-fundies").addEventListener("click", ShowCrossAssetForm);
     document.querySelector("#crossassetexit").addEventListener("click", CloseCrossAssetForm);
+
     
     let nodes = document.getElementsByClassName("chart-tab-btn");
     for (let i = 0; i < nodes.length; i++) { nodes[i].addEventListener('click', OpenTab); }
@@ -70,7 +73,8 @@ function KeyUpTickerSearchTxt(event) {
 }
 
 function ValidateStockSearchForm(event) {
-    //this validate can come from 2 forms. One on cross asset search, one on the primary ticker
+    //this validate can come from 2 forms. One on cross asset search, one on the primary ticker selection
+
     let formid = document.getElementById(event.currentTarget.id);
     let input = formid.getElementsByClassName("ticker-input-txt")[0].value.trim().toUpperCase();
     let validationlabel = formid.parentNode.getElementsByClassName("validation-lbl")[0];
@@ -113,14 +117,15 @@ function ValidateTicker() {
         //print validation message on label
         document.querySelector("#ticker-search-val-lbl").innerHTML = "Ticker is not available";
     } 
-
     return false;  
 }
 
 function OpenTab(event) {
-    //tab logic. Handle the switches between tabs here
-    //just plot because state shouldn't change on a tab click
+    //we define states as state of the interface or application. When a button is clicked it changes the chart state. and we draw according to the tab clicked.
+    //IE if we click gains distribution, the state of the graph is GainsDistribution. 
+    //depedent on the chart state the plot method changes. Please see the graphing API "Graphing.js"
     //cross asset config happens in the form validation not in the HTML
+ 
 
     switch (event.currentTarget.id) {
         case "btn-stats":
@@ -148,7 +153,13 @@ function OpenTab(event) {
             context.Plot();
             LoadChartTab();
             break;
-    }  
+        case "btn-poisson":
+            var newState = new Graph.GammaDistState(currentState);
+            currentState = newState;
+            context.SetState(currentState);
+            context.Plot();
+            LoadCPoissonTab();
+    }
 
     if (event.currentTarget.id == "btn-fundies" && currentState.CrossAssetLoaded) {
         //if we click the button and we have a cross asset loaded. show it. No update neccessary
@@ -162,11 +173,12 @@ function OpenTab(event) {
 
     //leave the plots in the swtich statement. Don't bring themn down
 }
-
+//The load tabs below are responsible for changing the graphics of the tab as neccessary
 function LoadStatsTab() {
     document.querySelector("#btn-stats").style.color = "silver";
     document.querySelector("#btn-chart").style.color = "black";
     document.querySelector("#btn-fundies").style.color = "black";
+    document.querySelector("#btn-poisson").style.color = "black";
   
 }
 
@@ -175,6 +187,7 @@ function LoadFundiesTab() {
     document.querySelector("#btn-fundies").style.color = "silver";
     document.querySelector("#btn-chart").style.color = "black";
     document.querySelector("#btn-stats").style.color = "black";
+    document.querySelector("#btn-poisson").style.color = "black";
  
 
     window.dispatchEvent(new Event('resize'));
@@ -185,9 +198,22 @@ function LoadChartTab() {
     document.querySelector("#btn-chart").style.color = "silver";
     document.querySelector("#btn-fundies").style.color = "black";
     document.querySelector("#btn-stats").style.color = "black";
+    document.querySelector("#btn-poisson").style.color = "black";
 
 }
 
+function LoadCPoissonTab() {
+
+    //katex.render("f(a,b,c) = (a^2+b^2+c^2)^3", 'katextarget');
+
+    document.querySelector("#btn-poisson").style.color = "silver";
+    document.querySelector("#btn-chart").style.color = "black";
+    document.querySelector("#btn-fundies").style.color = "black";
+    document.querySelector("#btn-stats").style.color = "black";
+
+}
+
+//END OF TAB EVENTS
 function DurationSlct(event) {
     //send async request for the new data based on the duration amount
     //Update all page data dependent on the time duration
@@ -202,7 +228,6 @@ function DurationSlct(event) {
     context.UpdateData();
     context.UpdateDataX();
     context.Plot();
-
 }
 
 

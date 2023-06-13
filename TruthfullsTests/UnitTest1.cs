@@ -8,7 +8,7 @@ namespace TruthfullsTests
 {
     public class Tests
     {
-        StockIndexModel StockIndexModelConstructor;
+  
         StockIndexModel StockIndexModelOnGet;
         IStockVMService _stockVMService;
 
@@ -95,7 +95,7 @@ namespace TruthfullsTests
             Assert.Pass();
         }
 
-        //no initialization of variables should be done in contructor.
+  
         //When page is requested you should init
         [Test]
         public void StockOnGetTests()

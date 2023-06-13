@@ -16,7 +16,7 @@ namespace truthfulls.com.Controllers
             
         }
 
-        //needs input of the ticker, timeframe as well as the duration of the data
+        //needs input of the ticker and the duration. Will pull both weekly and daily price gain data.
         [HttpGet]
         [Route("[controller]/{name:alpha}/{duration}/{focus?}")]
         public async Task<JsonResult> GetAsync(string name, int duration, int focus)
@@ -30,11 +30,15 @@ namespace truthfulls.com.Controllers
             var result2 = await stockVMService.GetWeeklyPricesAsync(name, duration);
             var result3 = await stockVMService.GetDailyGainsAsync(name, duration);
             var result4 = await stockVMService.GetWeeklyGainsAsync(name, duration);
-            var j = Json(new {dailyprices = result1, weeklyprices = result2, dailygains = result3, weeklygains = result4, selectedchart = focus });
-            //var j = Json(new {selectedchart = focus });
+            var result5 = (decimal)result3.Where(g => g.Gain > 0.0M).Select(g => g.Gain).ToList<decimal>().Count / result3.Count;
+            var result6 = (decimal)result4.Where(g => g.Gain > 0.0M).Select(g => g.Gain).ToList<decimal>().Count / result4.Count;
+            var j = Json(new { dailyprices = result1, weeklyprices = result2, dailygains = result3, weeklygains = result4, percentupD = result5, percentupW = result6 });
 
             return j;
         }
+
+
+
     }
 
 }
