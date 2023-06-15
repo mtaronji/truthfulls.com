@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Runtime.Intrinsics.X86;
 using truthfulls.com.Models;
 
 namespace truthfulls.com.Data
@@ -121,7 +123,7 @@ namespace truthfulls.com.Data
                     where t.nxtrow - t.gainrownum > 1
                 )
 
-                select pg.*, min(ep.weekend) as gainenddate, ep.gainrownum - pg.gainrownum + 1 as gainendrow
+                select min(ep.weekend) as gainenddate, ep.gainrownum - pg.gainrownum + 1 as gainendrow
                 from PGAINS pg,ENDP ep
                 where ep.weekend >= pg.weekend
                 group by pg.weekend";
@@ -159,7 +161,33 @@ namespace truthfulls.com.Data
             from PGAINS pg,ENDP ep
             where ep.[date] >= pg.[date]
             group by pg.[date]";
+        }
+        public static string SMA(string ticker, int duration)
+        {
+            return
 
+            $@"
+            select avg(n.[close]) as SMA from
+            (
+                select p.[close] from price p
+                where p.[ticker] = '{ticker}'
+                order by p.[date] desc
+                limit {duration}
+            ) n";
+        }
+
+        public static string EMA(string ticker, int duration)
+        {
+            return
+
+            $@"
+            select avg(n.[eclose]) as SMA from
+            (
+                select p.[close] * (2.0 / ({duration} + 1.0)) + p.[close] as eclose from price p 
+                where p.[ticker] = '{ticker}'
+                order by p.[date] desc
+                limit {duration}
+            ) n";
         }
     }
 }

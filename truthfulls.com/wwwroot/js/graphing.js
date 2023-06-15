@@ -1,4 +1,5 @@
 //*Istate represents all the possible states of the application interface. When events happen, this state changes. 
+
 //Depending on the chart button clicked, we will initiate a plot that might be different.
 export class IState{
     isweekly;
@@ -87,50 +88,78 @@ export class LoadCrossAsset extends IState {
 };
 
 //this is the object that will do the plotting based on the input of state. This object also updates the data when necessary(as an example when the duration changes)
-export var ChartContext = function (Cstate) {
+export class ChartContext{
 
-    let _state = Cstate;
-    this.Plot = function () {
-        _state.callback(_state);
+    _state;
+    constructor(Cstate){
+        this._state = Cstate;
     }
-    this.SetState = function (state) {
-        _state = state;
+    Plot() {
+        this._state.callback(this._state);
     }
-    this.UpdateData = function () {
-        let xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                let temp = JSON.parse(this.responseText);
-                _state.datastore["weeklyprices"] = temp["weeklyprices"];
-                _state.datastore["dailyprices"] = temp["dailyprices"];
-                _state.datastore["dailygains"] = temp["dailygains"];
-                _state.datastore["weeklygains"] = temp["weeklygains"];
-                _state.datastore["percentupD"] = temp["percentupD"];
-                _state.datastore["percentupW"] = temp["percentupW"];
-
-            }
-        };
-        xhttp.open("GET", "/ticker/".concat(_state.selectedticker, "/").concat(_state.duration), false);
-        xhttp.send();
+    SetState(state) {
+        this._state = state;
     }
 
-    this.UpdateDataX = function () {
-        if (!_state.CrossAssetLoaded) { return; }
-        let xhttp = new XMLHttpRequest();
-        xhttp.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                let temp = JSON.parse(this.responseText);
-                _state.datastore["weeklypricesX"] = temp["weeklyprices"];
-                _state.datastore["dailypricesX"] = temp["dailyprices"];
-                _state.datastore["dailygainsX"] = temp["dailygains"];
-                _state.datastore["weeklygainsX"] = temp["weeklygains"];
+    UpdateSelectedTickerDataAsync = async function () {
+        let r1 = await getDailyPriceDataAsync(this._state.selectedticker, this._state.duration);
+        let r2 = await getWeeklyPriceDataAsync(this._state.selectedticker, this._state.duration); 
+        let r3 = await getDGainDataAsync(this._state.selectedticker, this._state.duration);
+        let r4 = await getWGainDataAsync(this._state.selectedticker, this._state.duration);
 
-            }
-        };
-        xhttp.open("GET", "/ticker/".concat(_state.crossassetticker, "/").concat(_state.duration), false);
-        xhttp.send();
+        this._state.datastore['dailyprices'] = r1['dailyprices'];
+        this._state.datastore['weeklyprices'] = r2['weeklyprices'];
+        this._state.datastore['dailygains'] = r3['dailygains'];
+        this._state.datastore['percentupD'] = r3['percentupD'];
+        this._state.datastore['weeklygains'] = r4['weeklygains'];
+        this._state.datastore['percentupW'] = r4['percentupW'];       
     }
-    return this;
+
+    UpdateCrossAssetDataAsync = async function () {
+        if (!this._state.CrossAssetLoaded) { return; }
+
+        let r1 = await getDGainDataAsync(this._state.crossassetticker, this._state.duration);
+        let r2 = await getWGainDataAsync(this._state.crossassetticker, this._state.duration);
+
+        this._state.datastore['dailygainsX'] = r1['dailygains'];
+        this._state.datastore['weeklygainsX'] = r2['weeklygains'];
+    }
+}
+
+//async data requests
+async function getDailyPriceDataAsync(stock,duration) {
+    const response = await fetch('/stock/'.concat(stock, "/d/").concat(duration));
+    const data = await response.json();
+    return data;
+}
+
+async function getWeeklyPriceDataAsync(stock, duration) {
+    const response = await fetch('/stock/'.concat(stock, "/w/").concat(duration));
+    const data = await response.json();
+    return data;
+}
+
+async function getDGainDataAsync(stock,duration) {
+    const response = await fetch('/stock/'.concat(stock, "/d/gains/").concat(duration));
+
+    const data = await response.json();
+    return data;
+}
+async function getWGainDataAsync(stock,duration) {
+    const response = await fetch('/stock/'.concat(stock, "/w/gains/").concat(duration));
+    const data = await response.json();
+    return data;
+}
+
+async function getEMADataAsync(stock, duration) {
+    const response = await fetch('/ticker/'.concat(stock, "/ema/").concat(duration));
+    const data = await response.json();
+    return data;
+}
+async function getSMADataAsync(stock, duration) {
+    const response = await fetch('/ticker/'.concat(stock, "/sma/").concat(duration));
+    const data = await response.json();
+    return data;
 }
 
 function PlotPriceHistory(state) {

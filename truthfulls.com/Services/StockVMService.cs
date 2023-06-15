@@ -12,6 +12,8 @@ using System.Runtime.InteropServices;
 using Microsoft.Data.Sqlite;
 using System.Runtime.Caching;
 using Microsoft.Extensions.Caching.Memory;
+using System.Xml;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace truthfulls.com.Services
 {
@@ -24,6 +26,10 @@ namespace truthfulls.com.Services
         public Task<List<WeeklyPriceVM>> GetWeeklyPricesAsync(string ticker, int duration);
         public Task<List<CWGainsVM>> GetWeeklyConsecutivePGainsAsync(string ticker, int duration);
         public Task<List<CDGainsVM>> GetDailyConsecutivePGainsAsync(string ticker, int duration);
+
+        public Task<decimal> GetEMAAsync(string ticker, int duration);
+        public Task<decimal> GetSMAAsync(string ticker, int duration);
+
 
     }
 
@@ -42,11 +48,18 @@ namespace truthfulls.com.Services
             this.builder.ConnectionString = config.GetConnectionString("develop");
         }
 
+        //we gonna set the memory cache data to some of the most popular tickers most people will request.
+        private void SetMemoryCache()
+        {
+
+        }
+        //for unit testing .Create a mock empty cache 
         public StockVMService(string testconnectionstring)
         {
             //for unit tests
             builder = new();
             this.builder.ConnectionString = testconnectionstring;
+            this._cache = new Microsoft.Extensions.Caching.Memory.MemoryCache(new MemoryCacheOptions());
         }
 
         public async Task<List<string>> GetTickersAsync()
@@ -79,22 +92,22 @@ namespace truthfulls.com.Services
                             }
                             reader.Close();
                             if (tickers.Count > 0) { _cache.Set(key: "Tickers", tickers, TimeSpan.FromDays(1)); }
-                                                      
+
                         }
                     }
                 }
-                catch (SqliteException ex) 
-                { 
-                    Console.WriteLine(ex.Message); 
+                catch (SqliteException ex)
+                {
+                    Console.WriteLine(ex.Message);
                 }
             }
-            
+
             if (tickers == null)
-                throw new ArgumentNullException("tickers are null. Fatal Error");         
+                throw new ArgumentNullException("tickers are null. Fatal Error");
 
             return tickers;
         }
-        public async Task<List<DailyPriceVM>> GetDPricesAsync(string ticker, int duration) 
+        public async Task<List<DailyPriceVM>> GetDPricesAsync(string ticker, int duration)
         {
             ticker.ToUpper();
             var prices = new List<DailyPriceVM>();
@@ -239,7 +252,7 @@ namespace truthfulls.com.Services
                     }
                 }
             }
-            catch(SqlException ex) { Console.WriteLine(ex.Message); }
+            catch (SqlException ex) { Console.WriteLine(ex.Message); }
             return weeklyPrices;
         }
 
@@ -277,7 +290,7 @@ namespace truthfulls.com.Services
             catch (SqlException ex) { Console.WriteLine(ex.Message); }
 
 
-            
+
             return cgains;
         }
         public async Task<List<CWGainsVM>> GetWeeklyConsecutivePGainsAsync(string ticker, int duration)
@@ -299,8 +312,8 @@ namespace truthfulls.com.Services
                         {
                             var cwg = new CWGainsVM()
                             {
-                               Weekending = reader.GetDateTime(0).ToString("yyyy-MM-dd"),
-                               Gaincount = reader.GetInt64(1)
+                                Weekending = reader.GetDateTime(0).ToString("yyyy-MM-dd"),
+                                Gaincount = reader.GetInt64(1)
                             };
 
                             cgains.Add(cwg);
@@ -314,6 +327,65 @@ namespace truthfulls.com.Services
             return cgains;
         }
 
+        public async Task<decimal> GetEMAAsync(string ticker, int duration)
+        {
+            ticker.ToUpper();
+            var ema = new decimal();
+            string queryString = SQLiteQueries.EMA(ticker, duration);
+            try
+            {
+                using (var connection = new SqliteConnection(this.builder.ConnectionString))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = queryString;
 
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (reader.Read())
+                        {
+                            ema = reader.GetDecimal(0);
+
+                        }
+                        reader.Close();
+                    }
+                }
+            }
+            catch (SqlException ex) { Console.WriteLine(ex.Message); }
+            return ema;
+        }
+
+        public async Task<decimal> GetSMAAsync(string ticker, int duration)
+        {
+            ticker.ToUpper();
+            var sma = new decimal();
+            string queryString = SQLiteQueries.SMA(ticker, duration);
+
+            try
+            {
+                using (var connection = new SqliteConnection(this.builder.ConnectionString))
+                {
+                    connection.Open();
+                    var command = connection.CreateCommand();
+                    command.CommandText = queryString;
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+
+                        while (reader.Read())
+                        {
+                            sma = reader.GetDecimal(0);
+
+                        }
+                        reader.Close();
+                    }
+                }
+
+            }
+            catch (SqlException ex) { Console.WriteLine(ex.Message); }
+            return sma;
+        }
     }
+    
 }
+

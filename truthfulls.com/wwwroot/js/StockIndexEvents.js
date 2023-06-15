@@ -14,8 +14,7 @@ docReady(function () {
     
     context = new Graph.ChartContext(currentState);
     context.Plot();
-
-
+    LoadChartTab();
 });
 function LoadDataList() {
     let e = document.querySelector("#tickers-datalist");
@@ -38,7 +37,7 @@ function LoadEventListeners() {
 
     
     let nodes = document.getElementsByClassName("chart-tab-btn");
-    for (let i = 0; i < nodes.length; i++) { nodes[i].addEventListener('click', OpenTab); }
+    for (let i = 0; i < nodes.length; i++) { nodes[i].addEventListener('click', OpenTabAsync); }
 
 }
 
@@ -68,8 +67,7 @@ function KeyUpTickerSearchTxt(event) {
     else {
        //print validation message on label
         validationlabel.innerHTML = "Ticker is not available";
-    } 
-  
+    }  
 }
 
 function ValidateStockSearchForm(event) {
@@ -87,8 +85,7 @@ function ValidateStockSearchForm(event) {
     else {
         //print validation message on label
         validationlabel.innerHTML = "Ticker is not available <br>"
-        validationPassed = false;
-        return false;
+        event.preventDefault();
     }
 
     //we don't want cross assset form being posted.
@@ -97,7 +94,7 @@ function ValidateStockSearchForm(event) {
     if (isCrossAsset) {
         currentState.crossassetticker = input;
         let id = { currentTarget: { id: "btn-fundies-validated" } };
-        OpenTab(id);
+        OpenTabAsync(id);
         event.preventDefault();
     }
     return true;
@@ -120,7 +117,7 @@ function ValidateTicker() {
     return false;  
 }
 
-function OpenTab(event) {
+async function OpenTabAsync(event) {
     //we define states as state of the interface or application. When a button is clicked it changes the chart state. and we draw according to the tab clicked.
     //IE if we click gains distribution, the state of the graph is GainsDistribution. 
     //depedent on the chart state the plot method changes. Please see the graphing API "Graphing.js"
@@ -133,17 +130,17 @@ function OpenTab(event) {
             currentState = newState;
             context.SetState(currentState);
             context.Plot();
-            LoadStatsTab();
+            LoadGainsDistTab();
             break;
         case "btn-fundies-validated":
             CloseCrossAssetForm();
             var newState = new Graph.LoadCrossAsset(currentState);
             currentState = newState;
             context.SetState(currentState);
-            context.UpdateData();
-            context.UpdateDataX();
+            await context.UpdateSelectedTickerDataAsync();
+            await context.UpdateCrossAssetDataAsync();
             context.Plot();
-            LoadFundiesTab();
+            LoadXTab();
 
             break;
         case "btn-chart":
@@ -158,7 +155,7 @@ function OpenTab(event) {
             currentState = newState;
             context.SetState(currentState);
             context.Plot();
-            LoadCPoissonTab();
+            LoadPoissonTab();
     }
 
     if (event.currentTarget.id == "btn-fundies" && currentState.CrossAssetLoaded) {
@@ -167,14 +164,13 @@ function OpenTab(event) {
         currentState = newState;
         context.SetState(currentState);
         context.Plot();
-        LoadFundiesTab();
+        LoadXTab();
     }
     
 
-    //leave the plots in the swtich statement. Don't bring themn down
 }
 //The load tabs below are responsible for changing the graphics of the tab as neccessary
-function LoadStatsTab() {
+function LoadGainsDistTab() {
     document.querySelector("#btn-stats").style.color = "silver";
     document.querySelector("#btn-chart").style.color = "black";
     document.querySelector("#btn-fundies").style.color = "black";
@@ -182,7 +178,7 @@ function LoadStatsTab() {
   
 }
 
-function LoadFundiesTab() {
+function LoadXTab() {
 
     document.querySelector("#btn-fundies").style.color = "silver";
     document.querySelector("#btn-chart").style.color = "black";
@@ -202,7 +198,7 @@ function LoadChartTab() {
 
 }
 
-function LoadCPoissonTab() {
+function LoadPoissonTab() {
 
     //katex.render("f(a,b,c) = (a^2+b^2+c^2)^3", 'katextarget');
 
@@ -210,11 +206,10 @@ function LoadCPoissonTab() {
     document.querySelector("#btn-chart").style.color = "black";
     document.querySelector("#btn-fundies").style.color = "black";
     document.querySelector("#btn-stats").style.color = "black";
-
 }
 
 //END OF TAB EVENTS
-function DurationSlct(event) {
+async function DurationSlct(event) {
     //send async request for the new data based on the duration amount
     //Update all page data dependent on the time duration
     //check for Max selected by parsing the event value into int. If it's not a value, return duration of 500'
@@ -225,9 +220,11 @@ function DurationSlct(event) {
 
     currentState.duration = duration;
     context.SetState(currentState);
-    context.UpdateData();
-    context.UpdateDataX();
+
+    await context.UpdateSelectedTickerDataAsync();
+    await context.UpdateCrossAssetDataAsync();
     context.Plot();
+
 }
 
 

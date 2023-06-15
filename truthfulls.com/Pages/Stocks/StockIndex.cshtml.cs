@@ -59,8 +59,11 @@ namespace truthfulls.com.Pages
 
         public List<WeeklyPriceVM> WeeklyPrices { get; set; } = null!;
 
-        public List<CWGainsVM> CWGains { get; set; }
-        public List<CDGainsVM> CDGains { get; set; }
+        public List<CWGainsVM>? CWGains { get; set; }
+        public List<CDGainsVM>? CDGains { get; set; }
+
+        public decimal SMA200 { get; set; }
+        public decimal EMA20 { get; set; }
       
         //public List<DailyPriceVM> MonthlyPrices { get; set; } 
         //public List<DailyPriceVM> QuarterlyPrices { get; set; } 
@@ -122,7 +125,11 @@ namespace truthfulls.com.Pages
             this.WeeklyPercentageUp = (decimal)this.WPostiveGains.Count / (this.WPostiveGains.Count + this.WNegativeGains.Count);
             this.WeeklyPercentageDown = (decimal)this.WNegativeGains.Count / (this.WPostiveGains.Count + this.WNegativeGains.Count);
 
-            
+            this.CDGains = await this._StockVMService.GetDailyConsecutivePGainsAsync(this.SelectedTicker, int.Parse(this.Duration));
+            this.CWGains = await this._StockVMService.GetWeeklyConsecutivePGainsAsync(this.SelectedTicker, int.Parse(this.Duration));
+
+            this.SMA200 = await this._StockVMService.GetSMAAsync(this.SelectedTicker, 200);
+
 
             return Page();
         }
@@ -167,6 +174,10 @@ namespace truthfulls.com.Pages
             this.WeeklyPercentageDown = (decimal)this.WNegativeGains.Count / (this.WPostiveGains.Count + this.WNegativeGains.Count);
 
             this.CDGains = await this._StockVMService.GetDailyConsecutivePGainsAsync(this.SelectedTicker, int.Parse(this.Duration));
+            this.CWGains = await this._StockVMService.GetWeeklyConsecutivePGainsAsync(this.SelectedTicker, int.Parse(this.Duration));
+
+            this.SMA200 = await this._StockVMService.GetSMAAsync(this.SelectedTicker, 200);
+            this.EMA20 = await this._StockVMService.GetEMAAsync(this.SelectedTicker, 20);
 
         }
     }

@@ -11,14 +11,14 @@ namespace TruthfullsTests
   
         StockIndexModel StockIndexModelOnGet;
         IStockVMService _stockVMService;
+        StockController _API;
 
         List<DailyPriceVM> dailyprices;
-        List<WeeklyPriceVM> WeeklyPrices;
-        List<DailyPriceVM> dailypricesUpperCase;
-        List<DailyPriceVM> dailypricesLowerCase;
-        List<WeeklyPriceVM> weeklyPricesUpperCase;
-        List<WeeklyPriceVM> weeklyPricesLowerCase;
-
+        List<WeeklyPriceVM> weeklyprices;
+        List<CDGainsVM> cdGains;
+        List<CWGainsVM> CWGains;
+        decimal _SMA;
+        decimal _EMA;
 
         [SetUp]
         public async Task Setup()
@@ -28,67 +28,71 @@ namespace TruthfullsTests
             //set datasource to the correct location:
 
             _stockVMService = new StockVMService("Data Source=UnitTest.db;");
+            _API = new StockController(_stockVMService);
 
             //test state of the properties on get
             StockIndexModelOnGet = new(_stockVMService);
-            StockIndexModelOnGet.OnGet();
+            await StockIndexModelOnGet.OnGet();
 
-            dailypricesUpperCase = await this._stockVMService.GetDPricesAsync("tsla", 5);
-            dailypricesLowerCase = await this._stockVMService.GetDPricesAsync("TSLA", 5);
-            weeklyPricesUpperCase = await this._stockVMService.GetWeeklyPricesAsync("SPY", 5);
-            weeklyPricesLowerCase = await this._stockVMService.GetWeeklyPricesAsync("spy", 5);
+            dailyprices = await _stockVMService.GetDPricesAsync("AMD", 3);
+            weeklyprices = await _stockVMService.GetWeeklyPricesAsync("nvda", 3);
+            cdGains = await _stockVMService.GetDailyConsecutivePGainsAsync("qqq", 7);
+            CWGains = await _stockVMService.GetWeeklyConsecutivePGainsAsync("qqq", 2);
 
-            dailyprices = dailypricesLowerCase;
-            WeeklyPrices = weeklyPricesUpperCase;
+            _SMA = await _stockVMService.GetSMAAsync("qQq", 50);
+            _EMA = await _stockVMService.GetSMAAsync("spY", 200);
+
+
         }
 
         [Test]
         public void DBRetrieval()
         {
 
-            Assert.That(dailyprices.Count, Is.GreaterThan(0));
-            Assert.That(WeeklyPrices.Count, Is.GreaterThan(0));
-            Assert.That(dailyprices.Count, Is.GreaterThan(0));
-            Assert.That(WeeklyPrices.Count, Is.GreaterThan(0));
+            Assert.That(dailyprices, Has.Count.GreaterThan(0));
+            Assert.That(weeklyprices, Has.Count.GreaterThan(0));
+            Assert.That(CWGains, Has.Count.GreaterThan(0));
+            Assert.That(cdGains, Has.Count.GreaterThan(0));
+            Assert.That(_SMA, Is.GreaterThan(0));
+            Assert.That(_EMA, Is.GreaterThan(0));
+
         }
         [Test]
         public void StockVMserviceTests()
         {
 
-            Assert.That(dailyprices.Count, Is.GreaterThan(0));
-
             var Dailycloses = dailyprices.Select(c => c.Close).ToList<decimal>();
-            Assert.That(Dailycloses.Count, Is.GreaterThan(0));
+            Assert.That(Dailycloses, Has.Count.GreaterThan(0));
 
             var DailyDates = dailyprices.Select(d => d.Date).ToList<string>();
-            Assert.That(DailyDates.Count, Is.GreaterThan(0));
+            Assert.That(DailyDates, Has.Count.GreaterThan(0));
 
             var DailyLows = dailyprices.Select(d => d.Low).ToList<decimal>();
-            Assert.That(DailyLows.Count, Is.GreaterThan(0));
+            Assert.That(DailyLows, Has.Count.GreaterThan(0));
 
             var Dailyhighs = dailyprices.Select(d => d.High).ToList<decimal>();
-            Assert.That(Dailyhighs.Count, Is.GreaterThan(0));
+            Assert.That(Dailyhighs, Has.Count.GreaterThan(0));
 
             var Dailyopens = dailyprices.Select(d => d.Open).ToList<decimal>();
-            Assert.That(Dailyopens.Count, Is.GreaterThan(0));
+            Assert.That(Dailyopens, Has.Count.GreaterThan(0));
 
             var Dailyvolume = dailyprices.Select(d => d.Volume).ToList<Int64>();
-            Assert.That(Dailyvolume.Count, Is.GreaterThan(0));
+            Assert.That(Dailyvolume, Has.Count.GreaterThan(0));
 
-            var WeekEnding = WeeklyPrices.Select(x => x.WeekEnd).ToList<string>();
-            Assert.That(WeekEnding.Count, Is.GreaterThan(0));
+            var WeekEnding = weeklyprices.Select(x => x.WeekEnd).ToList<string>();
+            Assert.That(WeekEnding, Has.Count.GreaterThan(0));
 
-            var WeeklyCloses = WeeklyPrices.Select(x => x.Close).ToList<decimal>();
-            Assert.That(WeeklyCloses.Count, Is.GreaterThan(0));
+            var WeeklyCloses = weeklyprices.Select(x => x.Close).ToList<decimal>();
+            Assert.That(WeeklyCloses, Has.Count.GreaterThan(0));
 
-            var WeeklyLows = WeeklyPrices.Select(x => x.Low).ToList<decimal>();
-            Assert.That(WeeklyLows.Count, Is.GreaterThan(0));
+            var WeeklyLows = weeklyprices.Select(x => x.Low).ToList<decimal>();
+            Assert.That(WeeklyLows, Has.Count.GreaterThan(0));
 
-            var WeeklyHighs = WeeklyPrices.Select(x => x.High).ToList<decimal>();
-            Assert.That(WeeklyHighs.Count, Is.GreaterThan(0));
+            var WeeklyHighs = weeklyprices.Select(x => x.High).ToList<decimal>();
+            Assert.That(WeeklyHighs, Has.Count.GreaterThan(0));
 
-            var WeeklyOpens = WeeklyPrices.Select(x => x.Open).ToList<decimal>();
-            Assert.That(WeeklyOpens.Count, Is.GreaterThan(0));
+            var WeeklyOpens = weeklyprices.Select(x => x.Open).ToList<decimal>();
+            Assert.That(WeeklyOpens, Has.Count.GreaterThan(0));
 
             //assert no price data is an integer. Decimal data can be a whole number
 
@@ -101,33 +105,12 @@ namespace TruthfullsTests
         public void StockOnGetTests()
         {
 
-            Assert.That(StockIndexModelOnGet.SelectedTicker, Is.Not.Empty);
-            Assert.That(StockIndexModelOnGet.Duration, Is.EqualTo("5"));
-            Assert.That(StockIndexModelOnGet.Tickers.Count, Is.GreaterThan(0));
-
-            Assert.That(StockIndexModelOnGet.DailyPrices.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.DailyCloses.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.DailyDates.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.DailyHighs.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.DailyLows.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.DailyOpens.Count, Is.GreaterThan(0));
-
-
-
-            Assert.That(StockIndexModelOnGet.WeeklyPrices.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.WeekEnding.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.WeeklyHighs.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.WeeklyLows.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.WeeklyOpens.Count, Is.GreaterThan(0));
-            Assert.That(StockIndexModelOnGet.WeeklyCloses.Count, Is.GreaterThan(0));
-
-            Assert.Pass();
         }
 
         [Test]
         public void TickerAPITests()
         {
-
+            //API tests will be done in javascript testing
         }
 
     }

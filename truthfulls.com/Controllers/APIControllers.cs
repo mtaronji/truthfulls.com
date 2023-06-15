@@ -5,40 +5,77 @@ using System.Text.Json;
 namespace truthfulls.com.Controllers
 {
 
-    //return all the daily price data for the ticker
+    //return various stock data
     [ApiController]
-    public class TickerController : Controller
+    public class StockController : Controller
     {
         private IStockVMService stockVMService { get; } = null!;
-        public TickerController(IStockVMService s) 
+        public StockController(IStockVMService s)
         {
             this.stockVMService = s;
-            
+
         }
 
         //needs input of the ticker and the duration. Will pull both weekly and daily price gain data.
         [HttpGet]
-        [Route("[controller]/{name:alpha}/{duration}/{focus?}")]
-        public async Task<JsonResult> GetAsync(string name, int duration, int focus)
+        [Route("[controller]/{name:alpha}/d/{duration}")]
+        public async Task<JsonResult> GetDailyPrices(string name, int duration)
         {
-            //check if the ticker is in the database
+            //check if the ticker is in the database      
 
-            //_________________________________
-            if (duration == 0) { duration = 1; }
-
-            var result1 =  await stockVMService.GetDPricesAsync(name, duration);
-            var result2 = await stockVMService.GetWeeklyPricesAsync(name, duration);
-            var result3 = await stockVMService.GetDailyGainsAsync(name, duration);
-            var result4 = await stockVMService.GetWeeklyGainsAsync(name, duration);
-            var result5 = (decimal)result3.Where(g => g.Gain > 0.0M).Select(g => g.Gain).ToList<decimal>().Count / result3.Count;
-            var result6 = (decimal)result4.Where(g => g.Gain > 0.0M).Select(g => g.Gain).ToList<decimal>().Count / result4.Count;
-            var j = Json(new { dailyprices = result1, weeklyprices = result2, dailygains = result3, weeklygains = result4, percentupD = result5, percentupW = result6 });
+            var result1 = await stockVMService.GetDPricesAsync(name.ToUpper(), duration);
+            var j = Json(new { dailyprices = result1 });
 
             return j;
         }
 
+        [HttpGet]
+        [Route("[controller]/{name:alpha}/w/{duration}")]
+        public async Task<JsonResult> GetWeeklyPrices(string name, int duration)
+        {
+            var result1 = await stockVMService.GetWeeklyPricesAsync(name.ToUpper(), duration);
+            var j = Json(new { weeklyprices = result1 });
+            return j;
+        }
+        
+        [HttpGet]
+        [Route("[controller]/{name:alpha}/d/gains/{duration}")]
+        public async Task<JsonResult> GetDailyGains(string name, int duration)
+        {
+            var result1 = await stockVMService.GetDailyGainsAsync(name.ToUpper(), duration);
+            var result2 = (decimal)result1.Where(g => g.Gain > 0.0M).Select(g => g.Gain).ToList<decimal>().Count / result1.Count;
 
+            return Json(new { dailygains = result1, percentupD = result2});
+        }
+
+        [HttpGet]
+        [Route("[controller]/{name:alpha}/w/gains/{duration}")]
+        public async Task<JsonResult> GetWeeklyGains(string name, int duration)
+        {
+            var result1 = await stockVMService.GetWeeklyGainsAsync(name.ToUpper(), duration);
+            var result2 = (decimal)result1.Where(g => g.Gain > 0.0M).Select(g => g.Gain).ToList<decimal>().Count / result1.Count;
+            return Json(new { weeklygains = result1, percentupW = result2 });
+        }
+
+        //return the simple moving average of the duration
+        [HttpGet]
+        [Route("[controller]/{name:alpha}/sma/{duration}")]
+        public async Task<JsonResult> GetSMA(string name, int duration)
+        {
+            var result1 = await stockVMService.GetSMAAsync(name.ToUpper(), duration);
+            return Json(new { sma = result1});
+        }
+
+
+        //return the exponential moving average of the date specified
+        [HttpGet]
+        [Route("[controller]/{name:alpha}/ema/{duration}")]
+        public async Task<JsonResult> GetEMA(string name, int duration)
+        {
+            var result1 = await stockVMService.GetEMAAsync(name.ToUpper(), duration);
+            return Json(new { ema = result1 });
+
+        }
 
     }
-
 }
